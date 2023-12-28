@@ -15,6 +15,8 @@ type Attacks struct {
 func (a *Attacks) Generate(board *Board, attacker Color) {
 	slog.Debug("generating attacks", "attacker", attacker)
 
+	*a = Attacks{}
+
 	a.King(board, attacker)
 	a.Sliding(board, attacker)
 	a.Knight(board, attacker)

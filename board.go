@@ -10,6 +10,7 @@ import (
 
 type Board struct {
 	Player    Color
+	Attacks   Attacks
 	Pieces    [SquareCount]Piece
 	Kings     ColorTable[Square]
 	Bitboards struct {
@@ -177,6 +178,8 @@ func NewBoard(fen string) (Board, error) {
 			}
 		}
 	}
+
+	b.Attacks.Generate(&b, b.Player.Opponent())
 
 	return b, nil
 }
@@ -399,6 +402,7 @@ func (b Board) MakeMove(move Move) Board {
 		b.Moves.Full++
 	}
 
+	b.Attacks.Generate(&b, b.Player)
 	b.Player = b.Player.Opponent()
 
 	return b

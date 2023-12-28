@@ -40,6 +40,8 @@ func SetupTestBoard(pieces [SquareCount]Piece, init func(*Board)) Board {
 		init(&b)
 	}
 
+	b.Attacks.Generate(&b, b.Player.Opponent())
+
 	return b
 }
 
@@ -51,6 +53,9 @@ func (t *BoardTest) TestNewBoard() {
 
 		t.Assert().Equal(Board{
 			Player: ColorWhite,
+			Attacks: Attacks{
+				All: (BitboardRank6 | BitboardRank7 | BitboardRank8) & ^(SquareA8.Bitboard() | SquareH8.Bitboard()),
+			},
 			Pieces: [SquareCount]Piece{
 				SquareA8: PieceBlackRook,
 				SquareB8: PieceBlackKnight,
@@ -587,6 +592,34 @@ func (t *BoardTest) TestMakeMove() {
 				}
 
 				t.Assert().Equal(expected, b.Bitboards)
+			},
+		},
+
+		{
+			scenario: "attacks are updated",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareD7: PieceBlackKing,
+				SquareH2: PieceBlackRook,
+				SquareE1: PieceWhiteKing,
+				SquareH1: PieceWhiteBishop,
+			}, nil),
+			move: NewMove(SquareH2, SquareH1, MoveFlagsCapture),
+			assert: func(b Board) {
+				t.Assert().Equal(Attacks{
+					All: BitboardFileH&^SquareH1.Bitboard() |
+						SquareG1.Bitboard() | SquareF1.Bitboard() | SquareE1.Bitboard() |
+						SquareC8.Bitboard() | SquareD8.Bitboard() | SquareE8.Bitboard() |
+						SquareC7.Bitboard() | SquareE7.Bitboard() |
+						SquareC6.Bitboard() | SquareD6.Bitboard() | SquareE6.Bitboard(),
+					Checks: struct {
+						Check  bool
+						Double bool
+						Rays   Bitboard
+					}{
+						Check: true,
+						Rays:  SquareH1.Bitboard() | SquareG1.Bitboard() | SquareF1.Bitboard(),
+					},
+				}, b.Attacks)
 			},
 		},
 	} {
