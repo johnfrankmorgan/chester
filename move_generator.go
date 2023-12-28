@@ -161,15 +161,13 @@ func (mg MoveGenerator) _pawn(board *Board, player Color, opts MoveGeneratorOpti
 
 		if !opts.CapturesOnly {
 			for _, move := range Precomputed.Moves.Pawn[player][src] {
-				if !legal.IsSet(move.To.Bitboard()) || board.Bitboards.Colors[player.Opponent()].IsSet(move.To.Bitboard()) {
-					// precomputed pawn moves are ordered - single pushes first
-					// and then double pushes
-					// if this move isn't legal then the next one won't be
-					// either
+				if board.Bitboards.Colors[player].IsSet(move.To.Bitboard()) {
 					break
+				} else if board.Bitboards.Colors[player.Opponent()].IsSet(move.To.Bitboard()) {
+					break
+				} else if legal.IsSet(move.To.Bitboard()) {
+					moves = append(moves, move)
 				}
-
-				moves = append(moves, move)
 			}
 		}
 
