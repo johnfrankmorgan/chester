@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"strconv"
 	"testing"
 
@@ -15,6 +16,24 @@ func TestUtil(t *testing.T) {
 
 type UtilTest struct {
 	suite.Suite
+}
+
+func (t *UtilTest) TestCheck() {
+	t.Assert().NotPanics(func() {
+		check(nil)
+	})
+
+	t.Assert().PanicsWithValue(io.EOF, func() {
+		check(io.EOF)
+	})
+}
+
+func (t *UtilTest) TestMust() {
+	t.Assert().Equal(1, must(1, nil))
+
+	t.Assert().PanicsWithValue(io.EOF, func() {
+		must(1, io.EOF)
+	})
 }
 
 func (t *UtilTest) TestIstr() {

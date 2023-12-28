@@ -6,6 +6,18 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func must[T any](value T, err error) T {
+	check(err)
+
+	return value
+}
+
 func istr[T constraints.Integer](value T) string {
 	return fmt.Sprintf("%T(%d)", value, value)
 }

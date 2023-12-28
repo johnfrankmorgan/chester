@@ -352,10 +352,7 @@ func (t *AttacksTest) TestGeneration() {
 			scenario: "multiple pieces",
 			fn:       (*Attacks).Generate,
 			board: func() Board {
-				board, err := NewBoard("r1bqkbnr/p1p2ppp/p7/1B2pP1Q/3PP3/2P5/4K2P/RN5R b kq - 0 1")
-				if err != nil {
-					panic(err)
-				}
+				board := must(NewBoard("r1bqkbnr/p1p2ppp/p7/1B2pP1Q/3PP3/2P5/4K2P/RN5R b kq - 0 1"))
 
 				return board
 			}(),

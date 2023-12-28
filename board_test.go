@@ -158,16 +158,10 @@ func (t *BoardTest) TestNewBoard() {
 		}
 	})
 
-	raw, err := os.ReadFile("testdata/fens.json")
-	if err != nil {
-		panic(err)
-	}
-
+	raw := must(os.ReadFile("testdata/fens.json"))
 	fens := []string(nil)
 
-	if err := json.Unmarshal(raw, &fens); err != nil {
-		panic(err)
-	}
+	check(json.Unmarshal(raw, &fens))
 
 	for _, fen := range fens {
 		t.Run(fen, func() {
@@ -634,10 +628,7 @@ func (t *BoardTest) TestMakeMove() {
 }
 
 func (t *BoardTest) TestGenerateMoves() {
-	board, err := NewBoard(BoardStartPositionFEN)
-	if err != nil {
-		panic(err)
-	}
+	board := must(NewBoard(BoardStartPositionFEN))
 
 	t.Assert().Len(board.GenerateMoves(MoveGeneratorOptions{}), 20)
 }

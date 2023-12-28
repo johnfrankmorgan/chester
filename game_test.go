@@ -33,10 +33,7 @@ func (t *GameTest) TestNewGame() {
 }
 
 func (t *GameTest) TestBoard() {
-	board, err := NewBoard(BoardStartPositionFEN)
-	if err != nil {
-		panic(err)
-	}
+	board := must(NewBoard(BoardStartPositionFEN))
 
 	game := &Game{_boards: []Board{board}}
 
@@ -44,10 +41,7 @@ func (t *GameTest) TestBoard() {
 }
 
 func (t *GameTest) TestMakeMove() {
-	game, err := NewGame(BoardStartPositionFEN)
-	if err != nil {
-		panic(err)
-	}
+	game := must(NewGame(BoardStartPositionFEN))
 
 	game.MakeMove(NewMove(SquareE2, SquareE4, MoveFlagsDoublePawnPush))
 
@@ -55,10 +49,7 @@ func (t *GameTest) TestMakeMove() {
 }
 
 func (t *GameTest) TestUnmakeMove() {
-	game, err := NewGame(BoardStartPositionFEN)
-	if err != nil {
-		panic(err)
-	}
+	game := must(NewGame(BoardStartPositionFEN))
 
 	board := *game.Board()
 
