@@ -18,6 +18,31 @@ type BoardTest struct {
 	suite.Suite
 }
 
+func SetupTestBoard(pieces [SquareCount]Piece, init func(*Board)) Board {
+	b := Board{Pieces: pieces}
+
+	for src, piece := range b.Pieces {
+		src := Square(src)
+
+		if piece.Is(PieceNone) {
+			continue
+		} else if piece.Is(PieceKing) {
+			b.Kings[piece.Color()] = src
+		}
+
+		b.Bitboards.Colors[piece.Color()].Set(src.Bitboard())
+		b.Bitboards.Pieces[piece.Kind()].Set(src.Bitboard())
+	}
+
+	b.Bitboards.All = b.Bitboards.Colors[ColorBlack] | b.Bitboards.Colors[ColorWhite]
+
+	if init != nil {
+		init(&b)
+	}
+
+	return b
+}
+
 func (t *BoardTest) TestNewBoard() {
 	t.Run("standard start position can be parsed", func() {
 		board, err := NewBoard(BoardStartPositionFEN)
@@ -149,31 +174,6 @@ func (t *BoardTest) TestNewBoard() {
 	}
 }
 
-func (t *BoardTest) SetupBoard(pieces [SquareCount]Piece, init func(*Board)) Board {
-	b := Board{Pieces: pieces}
-
-	for src, piece := range b.Pieces {
-		src := Square(src)
-
-		if piece.Is(PieceNone) {
-			continue
-		} else if piece.Is(PieceKing) {
-			b.Kings[piece.Color()] = src
-		}
-
-		b.Bitboards.Colors[piece.Color()].Set(src.Bitboard())
-		b.Bitboards.Pieces[piece.Kind()].Set(src.Bitboard())
-	}
-
-	b.Bitboards.All = b.Bitboards.Colors[ColorBlack] | b.Bitboards.Colors[ColorWhite]
-
-	if init != nil {
-		init(&b)
-	}
-
-	return b
-}
-
 func (t *BoardTest) TestMakeMove() {
 	for _, test := range []struct {
 		scenario string
@@ -183,7 +183,7 @@ func (t *BoardTest) TestMakeMove() {
 	}{
 		{
 			scenario: "making a move updates player",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE2: PieceWhitePawn,
 			}, nil),
 			move: NewMove(SquareE2, SquareE3),
@@ -194,7 +194,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "pawn moves clear half move counter",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE2: PieceWhitePawn,
 			}, func(b *Board) { b.Moves.Half = 10 }),
 			move: NewMove(SquareE2, SquareE3),
@@ -205,7 +205,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "captures clear half move counter",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE2: PieceWhitePawn,
 			}, func(b *Board) { b.Moves.Half = 10 }),
 			move: NewMove(SquareE2, SquareD3, MoveFlagsCapture),
@@ -216,7 +216,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "black moving increments full move counter",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE2: PieceWhitePawn,
 			}, func(b *Board) { b.Moves.Full = 10 }),
 			move: NewMove(SquareE2, SquareD3, MoveFlagsCapture),
@@ -227,7 +227,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "king moves updates king position and castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE1: PieceWhiteKing,
 			}, func(b *Board) {
 				b.Player = ColorWhite
@@ -244,7 +244,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "castling white kingside moves rook",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE1: PieceWhiteKing,
 				SquareH1: PieceWhiteRook,
 			}, func(b *Board) { b.Player = ColorWhite }),
@@ -260,7 +260,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "castling white queenside moves rook",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE1: PieceWhiteKing,
 				SquareA1: PieceWhiteRook,
 			}, func(b *Board) { b.Player = ColorWhite }),
@@ -276,7 +276,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "castling black kingside moves rook",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE8: PieceBlackKing,
 				SquareH8: PieceBlackRook,
 			}, func(b *Board) { b.Player = ColorBlack }),
@@ -292,7 +292,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "castling black queenside moves rook",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareE8: PieceBlackKing,
 				SquareA8: PieceBlackRook,
 			}, func(b *Board) { b.Player = ColorBlack }),
@@ -308,7 +308,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "white promotion to queen",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB7: PieceWhitePawn,
 			}, func(b *Board) { b.Player = ColorWhite }),
 			move: NewMove(SquareB7, SquareB8, MoveFlagsPromoteToQueen),
@@ -321,7 +321,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "white promotion to rook",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB7: PieceWhitePawn,
 			}, func(b *Board) { b.Player = ColorWhite }),
 			move: NewMove(SquareB7, SquareB8, MoveFlagsPromoteToRook),
@@ -334,7 +334,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "white promotion to bishop",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB7: PieceWhitePawn,
 			}, func(b *Board) { b.Player = ColorWhite }),
 			move: NewMove(SquareB7, SquareB8, MoveFlagsPromoteToBishop),
@@ -347,7 +347,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "white promotion to knight",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB7: PieceWhitePawn,
 			}, func(b *Board) { b.Player = ColorWhite }),
 			move: NewMove(SquareB7, SquareB8, MoveFlagsPromoteToKnight),
@@ -360,7 +360,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "black promotion to queen",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB2: PieceBlackPawn,
 			}, func(b *Board) { b.Player = ColorBlack }),
 			move: NewMove(SquareB2, SquareB1, MoveFlagsPromoteToQueen),
@@ -373,7 +373,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "black promotion to rook",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB2: PieceBlackPawn,
 			}, func(b *Board) { b.Player = ColorBlack }),
 			move: NewMove(SquareB2, SquareB1, MoveFlagsPromoteToRook),
@@ -386,7 +386,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "black promotion to bishop",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB2: PieceBlackPawn,
 			}, func(b *Board) { b.Player = ColorBlack }),
 			move: NewMove(SquareB2, SquareB1, MoveFlagsPromoteToBishop),
@@ -399,7 +399,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "black promotion to knight",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareB2: PieceBlackPawn,
 			}, func(b *Board) { b.Player = ColorBlack }),
 			move: NewMove(SquareB2, SquareB1, MoveFlagsPromoteToKnight),
@@ -412,7 +412,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "white double pawn push updates en passant target",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareA2: PieceWhitePawn,
 			}, func(b *Board) { b.Player = ColorWhite }),
 			move: NewMove(SquareA2, SquareA4, MoveFlagsDoublePawnPush),
@@ -423,7 +423,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "black double pawn push updates en passant target",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareD7: PieceBlackPawn,
 			}, func(b *Board) { b.Player = ColorBlack }),
 			move: NewMove(SquareD7, SquareD5, MoveFlagsDoublePawnPush),
@@ -434,7 +434,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "moving white kingside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareH1: PieceWhiteRook,
 			}, func(b *Board) {
 				b.Player = ColorWhite
@@ -450,7 +450,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "moving black kingside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareH8: PieceBlackRook,
 			}, func(b *Board) {
 				b.Player = ColorBlack
@@ -466,7 +466,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "moving white queenside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareA1: PieceWhiteRook,
 			}, func(b *Board) {
 				b.Player = ColorWhite
@@ -482,7 +482,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "moving black queenside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareA8: PieceBlackRook,
 			}, func(b *Board) {
 				b.Player = ColorBlack
@@ -498,7 +498,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "capturing white kingside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareH8: PieceBlackRook,
 			}, func(b *Board) {
 				b.Player = ColorBlack
@@ -514,7 +514,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "capturing black kingside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareH1: PieceWhiteRook,
 			}, func(b *Board) {
 				b.Player = ColorWhite
@@ -530,7 +530,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "capturing white queenside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareA8: PieceBlackRook,
 			}, func(b *Board) {
 				b.Player = ColorBlack
@@ -546,7 +546,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "capturing black queenside rook updates castling rights",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareH1: PieceWhiteRook,
 			}, func(b *Board) {
 				b.Player = ColorWhite
@@ -562,7 +562,7 @@ func (t *BoardTest) TestMakeMove() {
 
 		{
 			scenario: "bitboards are updated",
-			board: t.SetupBoard([SquareCount]Piece{
+			board: SetupTestBoard([SquareCount]Piece{
 				SquareD7: PieceBlackKing,
 				SquareH2: PieceBlackRook,
 				SquareE1: PieceWhiteKing,

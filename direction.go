@@ -41,6 +41,31 @@ var (
 	}
 
 	_DirectionToEdge [SquareCount][DirectionCount]Square
+
+	Directions = [DirectionCount]Direction{
+		DirectionNorth,
+		DirectionSouth,
+		DirectionEast,
+		DirectionWest,
+		DirectionNorthEast,
+		DirectionSouthWest,
+		DirectionNorthWest,
+		DirectionSouthEast,
+	}
+
+	DirectionsOrthogonal = [...]Direction{
+		DirectionNorth,
+		DirectionSouth,
+		DirectionEast,
+		DirectionWest,
+	}
+
+	DirectionsDiagonal = [...]Direction{
+		DirectionNorthEast,
+		DirectionSouthWest,
+		DirectionNorthWest,
+		DirectionSouthEast,
+	}
 )
 
 func init() {
@@ -90,4 +115,12 @@ func (dir Direction) ToEdge(src Square) Square {
 
 func (dir Direction) Mask(src Square) Bitboard {
 	return Precomputed.Masks.Direction[src][dir]
+}
+
+func (dir Direction) IsOrthogonal() bool {
+	return dir < _DirectionDiagonalStart
+}
+
+func (dir Direction) IsDiagonal() bool {
+	return dir >= _DirectionDiagonalStart
 }

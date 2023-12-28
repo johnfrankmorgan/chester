@@ -157,3 +157,45 @@ func (t *DirectionTest) TestMask() {
 		})
 	}
 }
+
+func (t *DirectionTest) TestIsOrthogonal() {
+	for _, test := range []struct {
+		dir      Direction
+		expected bool
+	}{
+		{DirectionNorth, true},
+		{DirectionSouth, true},
+		{DirectionEast, true},
+		{DirectionWest, true},
+		{DirectionNorthEast, false},
+		{DirectionSouthWest, false},
+		{DirectionNorthWest, false},
+		{DirectionSouthEast, false},
+	} {
+		t.Run(test.dir.String(), func() {
+			t.Assert().Equal(test.expected, test.dir.IsOrthogonal())
+			t.Assert().Equal(test.expected, !test.dir.IsDiagonal())
+		})
+	}
+}
+
+func (t *DirectionTest) TestIsDiagonal() {
+	for _, test := range []struct {
+		dir      Direction
+		expected bool
+	}{
+		{DirectionNorth, false},
+		{DirectionSouth, false},
+		{DirectionEast, false},
+		{DirectionWest, false},
+		{DirectionNorthEast, true},
+		{DirectionSouthWest, true},
+		{DirectionNorthWest, true},
+		{DirectionSouthEast, true},
+	} {
+		t.Run(test.dir.String(), func() {
+			t.Assert().Equal(test.expected, test.dir.IsDiagonal())
+			t.Assert().Equal(test.expected, !test.dir.IsOrthogonal())
+		})
+	}
+}

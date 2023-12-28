@@ -126,7 +126,7 @@ func init() {
 			DirectionWest:  BitboardRanks[src.Rank()],
 		}
 
-		for dir := _DirectionDiagonalStart; dir < DirectionCount; dir++ {
+		for _, dir := range DirectionsDiagonal {
 			ray := src.Bitboard()
 
 			for _, off := range [...]Square{dir.Offset(), dir.Opposite().Offset()} {

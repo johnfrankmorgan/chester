@@ -13,3 +13,8 @@ tasks:
     deps: [test]
     cmds:
       - go tool cover -func=/tmp/chester.cov
+
+  test-coverage-html:
+    deps: [test]
+    cmds:
+      - go tool cover -html=/tmp/chester.cov
