@@ -132,5 +132,41 @@
         "CheckMates": 2733
       }
     ]
+  },
+  {
+    "FEN": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "Results": [
+      {
+        "Moves": 1,
+        "Checks": 1
+      },
+      {
+        "Moves": 6,
+        "Checks": 0
+      },
+      {
+        "Moves": 264,
+        "Captures": 87,
+        "Castles": 6,
+        "Promotions": 48,
+        "Checks": 10
+      },
+      {
+        "Moves": 9467,
+        "Captures": 1021,
+        "EnPassantCaptures": 4,
+        "Promotions": 120,
+        "Checks": 38,
+        "Checkmates": 22
+      },
+      {
+        "Moves": 422333,
+        "Captures": 131393,
+        "Castles": 7795,
+        "Promotions": 60032,
+        "Checks": 15492,
+        "Checkmates": 5
+      }
+    ]
   }
 ]
