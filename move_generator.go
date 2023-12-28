@@ -49,7 +49,27 @@ func (mg MoveGenerator) _king(board *Board, player Color, opts MoveGeneratorOpti
 		}
 	}
 
-	// TODO: castling
+	if !opts.CapturesOnly && !board.Attacks.Checks.Check {
+		if board.Castling[player].Kingside {
+			castle := BitboardsCastle[player].Kingside
+
+			if !board.Attacks.All.AnySet(castle.Attackers) && !board.Bitboards.All.AnySet(castle.Blockers) {
+				dst := src + DirectionEast.Offset()*2
+
+				moves = append(moves, NewMove(src, dst, MoveFlagsCastleKingside))
+			}
+		}
+
+		if board.Castling[player].Queenside {
+			castle := BitboardsCastle[player].Queenside
+
+			if !board.Attacks.All.AnySet(castle.Attackers) && !board.Bitboards.All.AnySet(castle.Blockers) {
+				dst := src + DirectionWest.Offset()*2
+
+				moves = append(moves, NewMove(src, dst, MoveFlagsCastleQueenside))
+			}
+		}
+	}
 
 	return moves
 }

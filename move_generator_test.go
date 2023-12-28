@@ -53,6 +53,201 @@ func (t *MoveGeneratorTest) TestGenerate() {
 		},
 
 		{
+			scenario: "white king can castle kingside",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE1: PieceWhiteKing,
+				SquareH1: PieceWhiteRook,
+				SquareA8: PieceBlackKing,
+			}, func(b *Board) {
+				b.Player = ColorWhite
+				b.Castling[ColorWhite].Kingside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE1, SquareD1),
+				NewMove(SquareE1, SquareF1),
+				NewMove(SquareE1, SquareE2),
+				NewMove(SquareE1, SquareD2),
+				NewMove(SquareE1, SquareF2),
+				NewMove(SquareH1, SquareG1),
+				NewMove(SquareH1, SquareF1),
+				NewMove(SquareH1, SquareH2),
+				NewMove(SquareH1, SquareH3),
+				NewMove(SquareH1, SquareH4),
+				NewMove(SquareH1, SquareH5),
+				NewMove(SquareH1, SquareH6),
+				NewMove(SquareH1, SquareH7),
+				NewMove(SquareH1, SquareH8),
+				NewMove(SquareE1, SquareG1, MoveFlagsCastleKingside),
+			},
+		},
+
+		{
+			scenario: "white king can castle queenside",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareA1: PieceWhiteRook,
+				SquareE1: PieceWhiteKing,
+				SquareH8: PieceBlackKing,
+			}, func(b *Board) {
+				b.Player = ColorWhite
+				b.Castling[ColorWhite].Queenside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE1, SquareD1),
+				NewMove(SquareE1, SquareF1),
+				NewMove(SquareE1, SquareE2),
+				NewMove(SquareE1, SquareD2),
+				NewMove(SquareE1, SquareF2),
+				NewMove(SquareA1, SquareB1),
+				NewMove(SquareA1, SquareC1),
+				NewMove(SquareA1, SquareD1),
+				NewMove(SquareA1, SquareA2),
+				NewMove(SquareA1, SquareA3),
+				NewMove(SquareA1, SquareA4),
+				NewMove(SquareA1, SquareA5),
+				NewMove(SquareA1, SquareA6),
+				NewMove(SquareA1, SquareA7),
+				NewMove(SquareA1, SquareA8),
+				NewMove(SquareE1, SquareC1, MoveFlagsCastleQueenside),
+			},
+		},
+
+		{
+			scenario: "black king can castle kingside",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareA1: PieceWhiteKing,
+				SquareE8: PieceBlackKing,
+				SquareH8: PieceBlackRook,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.Castling[ColorBlack].Kingside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE8, SquareD8),
+				NewMove(SquareE8, SquareF8),
+				NewMove(SquareE8, SquareE7),
+				NewMove(SquareE8, SquareD7),
+				NewMove(SquareE8, SquareF7),
+				NewMove(SquareH8, SquareG8),
+				NewMove(SquareH8, SquareF8),
+				NewMove(SquareH8, SquareH7),
+				NewMove(SquareH8, SquareH6),
+				NewMove(SquareH8, SquareH5),
+				NewMove(SquareH8, SquareH4),
+				NewMove(SquareH8, SquareH3),
+				NewMove(SquareH8, SquareH2),
+				NewMove(SquareH8, SquareH1),
+				NewMove(SquareE8, SquareG8, MoveFlagsCastleKingside),
+			},
+		},
+
+		{
+			scenario: "black king can castle queenside",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareA8: PieceBlackRook,
+				SquareE8: PieceBlackKing,
+				SquareH1: PieceWhiteKing,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.Castling[ColorBlack].Queenside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE8, SquareD8),
+				NewMove(SquareE8, SquareF8),
+				NewMove(SquareE8, SquareE7),
+				NewMove(SquareE8, SquareD7),
+				NewMove(SquareE8, SquareF7),
+				NewMove(SquareA8, SquareB8),
+				NewMove(SquareA8, SquareC8),
+				NewMove(SquareA8, SquareD8),
+				NewMove(SquareA8, SquareA7),
+				NewMove(SquareA8, SquareA6),
+				NewMove(SquareA8, SquareA5),
+				NewMove(SquareA8, SquareA4),
+				NewMove(SquareA8, SquareA3),
+				NewMove(SquareA8, SquareA2),
+				NewMove(SquareA8, SquareA1),
+				NewMove(SquareE8, SquareC8, MoveFlagsCastleQueenside),
+			},
+		},
+
+		{
+			scenario: "can't castle out of check",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE1: PieceWhiteRook,
+				SquareH1: PieceWhiteKing,
+				SquareA8: PieceBlackRook,
+				SquareE8: PieceBlackKing,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.Castling[ColorBlack].Queenside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE8, SquareD8),
+				NewMove(SquareE8, SquareF8),
+				NewMove(SquareE8, SquareD7),
+				NewMove(SquareE8, SquareF7),
+			},
+		},
+
+		{
+			scenario: "can't castle through check",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareD1: PieceWhiteRook,
+				SquareH1: PieceWhiteKing,
+				SquareA8: PieceBlackRook,
+				SquareE8: PieceBlackKing,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.Castling[ColorBlack].Queenside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE8, SquareE7),
+				NewMove(SquareE8, SquareF8),
+				NewMove(SquareE8, SquareF7),
+				NewMove(SquareA8, SquareB8),
+				NewMove(SquareA8, SquareC8),
+				NewMove(SquareA8, SquareD8),
+				NewMove(SquareA8, SquareA7),
+				NewMove(SquareA8, SquareA6),
+				NewMove(SquareA8, SquareA5),
+				NewMove(SquareA8, SquareA4),
+				NewMove(SquareA8, SquareA3),
+				NewMove(SquareA8, SquareA2),
+				NewMove(SquareA8, SquareA1),
+			},
+		},
+
+		{
+			scenario: "can't castle into check",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareC1: PieceWhiteRook,
+				SquareH1: PieceWhiteKing,
+				SquareA8: PieceBlackRook,
+				SquareE8: PieceBlackKing,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.Castling[ColorBlack].Queenside = true
+			}),
+			expected: []Move{
+				NewMove(SquareE8, SquareD7),
+				NewMove(SquareE8, SquareE7),
+				NewMove(SquareE8, SquareD8),
+				NewMove(SquareE8, SquareF8),
+				NewMove(SquareE8, SquareF7),
+				NewMove(SquareA8, SquareB8),
+				NewMove(SquareA8, SquareC8),
+				NewMove(SquareA8, SquareD8),
+				NewMove(SquareA8, SquareA7),
+				NewMove(SquareA8, SquareA6),
+				NewMove(SquareA8, SquareA5),
+				NewMove(SquareA8, SquareA4),
+				NewMove(SquareA8, SquareA3),
+				NewMove(SquareA8, SquareA2),
+				NewMove(SquareA8, SquareA1),
+			},
+		},
+
+		{
 			scenario: "only king moves generated in double check",
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareA1: PieceWhiteKing,

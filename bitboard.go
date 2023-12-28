@@ -52,6 +52,40 @@ var (
 		Rank7: BitboardRank7,
 		Rank8: BitboardRank8,
 	}
+
+	BitboardsCastle = ColorTable[struct {
+		Kingside struct {
+			Attackers, Blockers Bitboard
+		}
+
+		Queenside struct {
+			Attackers, Blockers Bitboard
+		}
+	}]{
+		ColorWhite: {
+			Kingside: struct{ Attackers, Blockers Bitboard }{
+				Attackers: SquareF1.Bitboard() | SquareG1.Bitboard(),
+				Blockers:  SquareF1.Bitboard() | SquareG1.Bitboard(),
+			},
+
+			Queenside: struct{ Attackers, Blockers Bitboard }{
+				Attackers: SquareC1.Bitboard() | SquareD1.Bitboard(),
+				Blockers:  SquareB1.Bitboard() | SquareC1.Bitboard() | SquareD1.Bitboard(),
+			},
+		},
+
+		ColorBlack: {
+			Kingside: struct{ Attackers, Blockers Bitboard }{
+				Attackers: SquareF8.Bitboard() | SquareG8.Bitboard(),
+				Blockers:  SquareF8.Bitboard() | SquareG8.Bitboard(),
+			},
+
+			Queenside: struct{ Attackers, Blockers Bitboard }{
+				Attackers: SquareC8.Bitboard() | SquareD8.Bitboard(),
+				Blockers:  SquareB8.Bitboard() | SquareC8.Bitboard() | SquareD8.Bitboard(),
+			},
+		},
+	}
 )
 
 func (b Bitboard) String() string {
