@@ -603,6 +603,26 @@ func (t *MoveGeneratorTest) TestGenerate() {
 				NewMove(SquareC4, SquareC3),
 			},
 		},
+
+		{
+			scenario: "pawn captures to rank 1 or 8 result in promotion",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareA1: PieceWhiteKing,
+				SquareC1: PieceBlackKing,
+				SquareB1: PieceWhiteRook,
+				SquareC2: PieceBlackPawn,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.EnPassant = SquareB3
+			}),
+			opts: MoveGeneratorOptions{CapturesOnly: true},
+			expected: []Move{
+				NewMove(SquareC2, SquareB1, MoveFlagsCapture, MoveFlagsPromoteToQueen),
+				NewMove(SquareC2, SquareB1, MoveFlagsCapture, MoveFlagsPromoteToRook),
+				NewMove(SquareC2, SquareB1, MoveFlagsCapture, MoveFlagsPromoteToBishop),
+				NewMove(SquareC2, SquareB1, MoveFlagsCapture, MoveFlagsPromoteToKnight),
+			},
+		},
 	} {
 		t.Run(test.scenario, func() {
 			moves := MoveGenerator{}.Generate(&test.board, test.opts)

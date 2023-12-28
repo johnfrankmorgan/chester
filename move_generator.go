@@ -195,7 +195,14 @@ func (mg MoveGenerator) _pawn(board *Board, player Color, opts MoveGeneratorOpti
 
 		for _, dst := range Precomputed.Attacks.Pawn[player][src] {
 			if board.Bitboards.Colors[player.Opponent()].IsSet(dst.Bitboard()) && legal.IsSet(dst.Bitboard()) {
-				moves = append(moves, NewMove(src, dst, MoveFlagsCapture))
+				if dst.Rank() == Rank1 || dst.Rank() == Rank8 {
+					moves = append(moves, NewMove(src, dst, MoveFlagsCapture, MoveFlagsPromoteToQueen))
+					moves = append(moves, NewMove(src, dst, MoveFlagsCapture, MoveFlagsPromoteToRook))
+					moves = append(moves, NewMove(src, dst, MoveFlagsCapture, MoveFlagsPromoteToBishop))
+					moves = append(moves, NewMove(src, dst, MoveFlagsCapture, MoveFlagsPromoteToKnight))
+				} else {
+					moves = append(moves, NewMove(src, dst, MoveFlagsCapture))
+				}
 			} else if dst == board.EnPassant {
 				ep := board.EnPassant + ternary(player == ColorWhite, DirectionSouth.Offset(), DirectionNorth.Offset())
 				capture := true
