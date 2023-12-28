@@ -26,7 +26,7 @@ func (t *AttacksTest) TestGeneration() {
 	}{
 		{
 			scenario: "king on edge",
-			fn:       (*Attacks).King,
+			fn:       (*Attacks)._king,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareE1: PieceWhiteKing,
 			}, nil),
@@ -42,7 +42,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "king in center",
-			fn:       (*Attacks).King,
+			fn:       (*Attacks)._king,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareD4: PieceBlackKing,
 			}, nil),
@@ -61,7 +61,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "white rook",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareB1: PieceWhiteRook,
 			}, nil),
@@ -73,7 +73,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "black bishop",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareE3: PieceBlackBishop,
 			}, nil),
@@ -85,7 +85,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "white queens",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareE4: PieceWhiteQueen,
 				SquareE3: PieceWhiteQueen,
@@ -102,7 +102,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "rook check",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareA3: PieceWhiteRook,
 				SquareA7: PieceBlackKing,
@@ -115,7 +115,8 @@ func (t *AttacksTest) TestGeneration() {
 					SquareA4.Bitboard() |
 					SquareA5.Bitboard() |
 					SquareA6.Bitboard() |
-					SquareA7.Bitboard(),
+					SquareA7.Bitboard() |
+					SquareA8.Bitboard(),
 				Checks: struct {
 					Check  bool
 					Double bool
@@ -125,14 +126,15 @@ func (t *AttacksTest) TestGeneration() {
 					Rays: SquareA3.Bitboard() |
 						SquareA4.Bitboard() |
 						SquareA5.Bitboard() |
-						SquareA6.Bitboard(),
+						SquareA6.Bitboard() |
+						SquareA7.Bitboard(),
 				},
 			},
 		},
 
 		{
 			scenario: "bishop check",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareG2: PieceBlackBishop,
 				SquareF1: PieceWhiteKing,
@@ -148,14 +150,14 @@ func (t *AttacksTest) TestGeneration() {
 					Rays   Bitboard
 				}{
 					Check: true,
-					Rays:  SquareG2.Bitboard(),
+					Rays:  SquareG2.Bitboard() | SquareF1.Bitboard(),
 				},
 			},
 		},
 
 		{
 			scenario: "bishop long diagonal",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareH8: PieceWhiteBishop,
 			}, nil),
@@ -167,7 +169,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "pinned piece",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareB1: PieceWhiteRook,
 				SquareB5: PieceBlackBishop,
@@ -180,13 +182,13 @@ func (t *AttacksTest) TestGeneration() {
 					SquareB3.Bitboard() |
 					SquareB4.Bitboard() |
 					SquareB5.Bitboard(),
-				Pins: BitboardFileB &^ SquareB8.Bitboard(),
+				Pins: BitboardFileB,
 			},
 		},
 
 		{
 			scenario: "two pieces between attacker and king is not pinned",
-			fn:       (*Attacks).Sliding,
+			fn:       (*Attacks)._sliding,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareB1: PieceWhiteRook,
 				SquareB5: PieceBlackBishop,
@@ -205,7 +207,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "knight on edge",
-			fn:       (*Attacks).Knight,
+			fn:       (*Attacks)._knight,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareB1: PieceWhiteKnight,
 			}, nil),
@@ -217,7 +219,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "knight in center",
-			fn:       (*Attacks).Knight,
+			fn:       (*Attacks)._knight,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareF4: PieceWhiteKnight,
 			}, nil),
@@ -236,7 +238,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "knight check",
-			fn:       (*Attacks).Knight,
+			fn:       (*Attacks)._knight,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareF4: PieceWhiteKnight,
 				SquareH3: PieceBlackKing,
@@ -257,14 +259,14 @@ func (t *AttacksTest) TestGeneration() {
 					Rays   Bitboard
 				}{
 					Check: true,
-					Rays:  SquareF4.Bitboard(),
+					Rays:  SquareF4.Bitboard() | SquareH3.Bitboard(),
 				},
 			},
 		},
 
 		{
 			scenario: "white pawns",
-			fn:       (*Attacks).Pawn,
+			fn:       (*Attacks)._pawn,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareD4: PieceWhitePawn,
 				SquareE4: PieceWhitePawn,
@@ -280,7 +282,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "black pawns",
-			fn:       (*Attacks).Pawn,
+			fn:       (*Attacks)._pawn,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareD3: PieceBlackPawn,
 				SquareE4: PieceBlackPawn,
@@ -296,7 +298,7 @@ func (t *AttacksTest) TestGeneration() {
 
 		{
 			scenario: "pawn check",
-			fn:       (*Attacks).Pawn,
+			fn:       (*Attacks)._pawn,
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareD3: PieceBlackPawn,
 				SquareE2: PieceWhiteKing,
@@ -311,7 +313,7 @@ func (t *AttacksTest) TestGeneration() {
 					Rays   Bitboard
 				}{
 					Check: true,
-					Rays:  SquareD3.Bitboard(),
+					Rays:  SquareD3.Bitboard() | SquareE2.Bitboard(),
 				},
 			},
 		},
@@ -341,7 +343,7 @@ func (t *AttacksTest) TestGeneration() {
 					Double: true,
 					Rays: SquareA3.Bitboard() |
 						SquareA2.Bitboard() |
-						DirectionSouthWest.Mask(SquareH8)&^SquareA1.Bitboard(),
+						DirectionSouthWest.Mask(SquareH8),
 				},
 			},
 		},
@@ -404,9 +406,9 @@ func (t *AttacksTest) TestGeneration() {
 					Rays   Bitboard
 				}{
 					Check: true,
-					Rays:  SquareB5.Bitboard() | SquareC6.Bitboard() | SquareD7.Bitboard(),
+					Rays:  SquareB5.Bitboard() | SquareC6.Bitboard() | SquareD7.Bitboard() | SquareE8.Bitboard(),
 				},
-				Pins: SquareH5.Bitboard() | SquareG6.Bitboard() | SquareF7.Bitboard(),
+				Pins: SquareH5.Bitboard() | SquareG6.Bitboard() | SquareF7.Bitboard() | SquareE8.Bitboard(),
 			},
 		},
 	} {
@@ -418,4 +420,24 @@ func (t *AttacksTest) TestGeneration() {
 			t.Assert().Equal(test.expected, attacks)
 		})
 	}
+}
+
+func (t *AttacksTest) TestIsAttacked() {
+	attacks := Attacks{
+		All: SquareA5.Bitboard() | SquareA3.Bitboard(),
+	}
+
+	t.Assert().True(attacks.IsAttacked(SquareA5))
+	t.Assert().True(attacks.IsAttacked(SquareA3))
+	t.Assert().False(attacks.IsAttacked(SquareB2))
+}
+
+func (t *AttacksTest) TestIsPinned() {
+	attacks := Attacks{
+		Pins: SquareA5.Bitboard() | SquareA3.Bitboard(),
+	}
+
+	t.Assert().True(attacks.IsPinned(SquareA5))
+	t.Assert().True(attacks.IsPinned(SquareA3))
+	t.Assert().False(attacks.IsPinned(SquareB2))
 }

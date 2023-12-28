@@ -607,7 +607,7 @@ func (t *BoardTest) TestMakeMove() {
 			assert: func(b Board) {
 				t.Assert().Equal(Attacks{
 					All: BitboardFileH&^SquareH1.Bitboard() |
-						SquareG1.Bitboard() | SquareF1.Bitboard() | SquareE1.Bitboard() |
+						SquareG1.Bitboard() | SquareF1.Bitboard() | SquareE1.Bitboard() | SquareD1.Bitboard() |
 						SquareC8.Bitboard() | SquareD8.Bitboard() | SquareE8.Bitboard() |
 						SquareC7.Bitboard() | SquareE7.Bitboard() |
 						SquareC6.Bitboard() | SquareD6.Bitboard() | SquareE6.Bitboard(),
@@ -617,7 +617,7 @@ func (t *BoardTest) TestMakeMove() {
 						Rays   Bitboard
 					}{
 						Check: true,
-						Rays:  SquareH1.Bitboard() | SquareG1.Bitboard() | SquareF1.Bitboard(),
+						Rays:  SquareH1.Bitboard() | SquareG1.Bitboard() | SquareF1.Bitboard() | SquareE1.Bitboard(),
 					},
 				}, b.Attacks)
 			},

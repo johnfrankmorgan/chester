@@ -17,13 +17,21 @@ func (a *Attacks) Generate(board *Board, attacker Color) {
 
 	*a = Attacks{}
 
-	a.King(board, attacker)
-	a.Sliding(board, attacker)
-	a.Knight(board, attacker)
-	a.Pawn(board, attacker)
+	a._king(board, attacker)
+	a._sliding(board, attacker)
+	a._knight(board, attacker)
+	a._pawn(board, attacker)
 }
 
-func (a *Attacks) King(board *Board, attacker Color) {
+func (a *Attacks) IsAttacked(square Square) bool {
+	return a.All.IsSet(square.Bitboard())
+}
+
+func (a *Attacks) IsPinned(square Square) bool {
+	return a.Pins.IsSet(square.Bitboard())
+}
+
+func (a *Attacks) _king(board *Board, attacker Color) {
 	slog.Debug("generating king attacks", "attacker", attacker)
 
 	src := board.Kings[attacker]
@@ -37,7 +45,7 @@ func (a *Attacks) King(board *Board, attacker Color) {
 	}
 }
 
-func (a *Attacks) Sliding(board *Board, attacker Color) {
+func (a *Attacks) _sliding(board *Board, attacker Color) {
 	slog.Debug("generating sliding attacks", "attacker", attacker)
 
 	queens := board.Bitboards.Pieces[PieceQueen]
@@ -66,6 +74,8 @@ func (a *Attacks) Sliding(board *Board, attacker Color) {
 					a.All.Set(dst.Bitboard())
 				}
 
+				ray.Set(dst.Bitboard())
+
 				if board.Bitboards.Colors[attacker].IsSet(dst.Bitboard()) {
 					break
 				} else if board.Bitboards.Colors[attacker.Opponent()].IsSet(dst.Bitboard()) {
@@ -73,6 +83,12 @@ func (a *Attacks) Sliding(board *Board, attacker Color) {
 						if pin {
 							a.Pins.Set(ray)
 						} else {
+							if dir.ToEdge(dst) > 0 {
+								// extend attacks through king by one square
+								// so that we can't accidentally stay in check
+								a.All.Set((dst + dir.Offset()).Bitboard())
+							}
+
 							a.Checks.Double = a.Checks.Check
 							a.Checks.Check = true
 							a.Checks.Rays.Set(ray)
@@ -87,14 +103,12 @@ func (a *Attacks) Sliding(board *Board, attacker Color) {
 
 					pin = true
 				}
-
-				ray.Set(dst.Bitboard())
 			}
 		}
 	}
 }
 
-func (a *Attacks) Knight(board *Board, attacker Color) {
+func (a *Attacks) _knight(board *Board, attacker Color) {
 	slog.Debug("generating knight attacks", "attacker", attacker)
 
 	knights := board.Bitboards.Pieces[PieceKnight] & board.Bitboards.Colors[attacker]
@@ -108,13 +122,13 @@ func (a *Attacks) Knight(board *Board, attacker Color) {
 			if dst == board.Kings[attacker.Opponent()] {
 				a.Checks.Double = a.Checks.Check
 				a.Checks.Check = true
-				a.Checks.Rays.Set(src.Bitboard())
+				a.Checks.Rays.Set(src.Bitboard() | dst.Bitboard())
 			}
 		}
 	}
 }
 
-func (a *Attacks) Pawn(board *Board, attacker Color) {
+func (a *Attacks) _pawn(board *Board, attacker Color) {
 	slog.Debug("generating pawn attacks", "attacker", attacker)
 
 	pawns := board.Bitboards.Pieces[PiecePawn] & board.Bitboards.Colors[attacker]
@@ -128,7 +142,7 @@ func (a *Attacks) Pawn(board *Board, attacker Color) {
 			if dst == board.Kings[attacker.Opponent()] {
 				a.Checks.Double = a.Checks.Check
 				a.Checks.Check = true
-				a.Checks.Rays.Set(src.Bitboard())
+				a.Checks.Rays.Set(src.Bitboard() | dst.Bitboard())
 			}
 		}
 	}
