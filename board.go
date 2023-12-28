@@ -357,6 +357,17 @@ func (b Board) MakeMove(move Move) Board {
 			} else {
 				b.EnPassant = move.From + DirectionSouth.Offset()
 			}
+		} else if move.Flags.IsSet(MoveFlagsCaptureEnPassant) {
+			captured := move.To + DirectionSouth.Offset()
+
+			if color == ColorBlack {
+				captured = move.To + DirectionNorth.Offset()
+			}
+
+			b.Pieces[captured] = PieceEmpty
+			b.Bitboards.All.Clear(captured.Bitboard())
+			b.Bitboards.Colors[color.Opponent()].Clear(captured.Bitboard())
+			b.Bitboards.Pieces[PiecePawn].Clear(captured.Bitboard())
 		}
 	} else if piece.Is(PieceRook) {
 		if move.From == SquareA1 || move.From == SquareA8 {

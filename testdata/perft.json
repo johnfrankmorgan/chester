@@ -38,5 +38,99 @@
         "Checkmates": 10828
       }
     ]
+  },
+  {
+    "FEN": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "Results": [
+      {
+        "Moves": 1
+      },
+      {
+        "Moves": 48,
+        "Captures": 8,
+        "Castles": 2
+      },
+      {
+        "Moves": 2039,
+        "Captures": 351,
+        "EnPassantCaptures": 1,
+        "Castles": 91,
+        "Checks": 3
+      },
+      {
+        "Moves": 97862,
+        "Captures": 17102,
+        "EnPassantCaptures": 45,
+        "Castles": 3162,
+        "Checks": 993,
+        "Checkmates": 1
+      },
+      {
+        "Moves": 4085603,
+        "Captures": 757163,
+        "EnPassantCaptures": 1929,
+        "Castles": 128013,
+        "Promotions": 15172,
+        "Checks": 25523,
+        "DoubleChecks": 6,
+        "Checkmates": 43
+      },
+      {
+        "Moves": 193690690,
+        "Captures": 35043416,
+        "EnPassantCaptures": 73365,
+        "Castles": 4993637,
+        "Promotions": 8392,
+        "Checks": 3309887,
+        "DoubleChecks": 2637,
+        "Checkmates": 30171
+      }
+    ]
+  },
+  {
+    "FEN": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "Results": [
+      {
+        "Moves": 1
+      },
+      {
+        "Moves": 14,
+        "Captures": 1,
+        "Checks": 2
+      },
+      {
+        "Moves": 191,
+        "Captures": 14,
+        "Checks": 10
+      },
+      {
+        "Moves": 2812,
+        "Captures": 209,
+        "EnPassantCaptures": 2,
+        "Checks": 267
+      },
+      {
+        "Moves": 43238,
+        "Captures": 3348,
+        "EnPassantCaptures": 123,
+        "Checks": 1680,
+        "Checkmates": 17
+      },
+      {
+        "Moves": 674624,
+        "Captures": 52051,
+        "EnPassantCaptures": 1165,
+        "Checks": 52950,
+        "DoubleChecks": 3
+      },
+      {
+        "Moves": 11030083,
+        "Captures": 940350,
+        "EnPassantCaptures": 33325,
+        "Promotions": 7552,
+        "Checks": 452473,
+        "CheckMates": 2733
+      }
+    ]
   }
 ]

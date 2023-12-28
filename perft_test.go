@@ -23,7 +23,7 @@ func TestPerft(t *testing.T) {
 
 	for _, test := range tests {
 		for depth, expected := range test.Results {
-			if depth > 5 && testing.Short() {
+			if depth > 4 && testing.Short() {
 				break
 			}
 

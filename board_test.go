@@ -432,6 +432,23 @@ func (t *BoardTest) TestMakeMove() {
 		},
 
 		{
+			scenario: "capturing en passant target",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareD4: PieceBlackPawn,
+				SquareE4: PieceWhitePawn,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.EnPassant = SquareE3
+			}),
+			move: NewMove(SquareD4, SquareE3, MoveFlagsCapture, MoveFlagsCaptureEnPassant),
+			assert: func(b Board) {
+				t.Assert().EqualValues(0, b.Bitboards.Colors[ColorWhite])
+				t.Assert().Equal(SquareE3.Bitboard(), b.Bitboards.Pieces[PiecePawn])
+				t.Assert().Equal(SquareE3.Bitboard(), b.Bitboards.All)
+			},
+		},
+
+		{
 			scenario: "moving white kingside rook updates castling rights",
 			board: SetupTestBoard([SquareCount]Piece{
 				SquareH1: PieceWhiteRook,

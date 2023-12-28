@@ -18,8 +18,8 @@ func Perft(game *Game, depth int) PerftResult {
 			EnPassantCaptures: ternary(game.Board().Moves.Last.Flags.IsSet(MoveFlagsCaptureEnPassant), 1, 0),
 			Checks:            ternary(game.Board().Attacks.Checks.Check, 1, 0),
 			DoubleChecks:      ternary(game.Board().Attacks.Checks.Double, 1, 0),
-			Castles:           ternary(game.Board().Moves.Last.Flags.IsSet(MoveFlagsCastle), 1, 0),
-			Promotions:        ternary(game.Board().Moves.Last.Flags.IsSet(MoveFlagsPromote), 1, 0),
+			Castles:           ternary(game.Board().Moves.Last.Flags.AnySet(MoveFlagsCastle), 1, 0),
+			Promotions:        ternary(game.Board().Moves.Last.Flags.AnySet(MoveFlagsPromote), 1, 0),
 		}
 	}
 
