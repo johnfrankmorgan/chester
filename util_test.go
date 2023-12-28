@@ -73,3 +73,19 @@ func (t *UtilTest) TestSign() {
 		})
 	}
 }
+
+func (t *UtilTest) TestTernary() {
+	for _, test := range []struct {
+		condition bool
+		tvalue    int
+		fvalue    int
+		expected  int
+	}{
+		{true, 1, 100, 1},
+		{false, 1, 100, 100},
+	} {
+		t.Run(strconv.FormatBool(test.condition), func() {
+			t.Assert().Equal(test.expected, ternary(test.condition, test.tvalue, test.fvalue))
+		})
+	}
+}

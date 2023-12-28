@@ -30,7 +30,7 @@ jobs:
       with:
         go-version-file: go.mod
     - uses: arduino/setup-task@v1
-    - run: task test-coverage
+    - run: task test-coverage -- -short
     - uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}

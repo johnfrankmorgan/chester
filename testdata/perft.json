@@ -1,0 +1,42 @@
+[
+  {
+    "FEN": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "Results": [
+      {
+        "Moves": 1
+      },
+      {
+        "Moves": 20
+      },
+      {
+        "Moves": 400
+      },
+      {
+        "Moves": 8902,
+        "Captures": 34,
+        "Checks": 12
+      },
+      {
+        "Moves": 197281,
+        "Captures": 1576,
+        "Checks": 469,
+        "Checkmates": 8
+      },
+      {
+        "Moves": 4865609,
+        "Captures": 82719,
+        "EnPassantCaptures": 258,
+        "Checks": 27351,
+        "Checkmates": 347
+      },
+      {
+        "Moves": 119060324,
+        "Captures": 2812008,
+        "EnPassantCaptures": 5248,
+        "Checks": 809099,
+        "DoubleChecks": 46,
+        "Checkmates": 10828
+      }
+    ]
+  }
+]

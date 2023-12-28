@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+
+	"github.com/alecthomas/repr"
 )
 
 func init() {
@@ -27,5 +29,9 @@ func init() {
 }
 
 func main() {
-	//
+	game := must(NewGame(BoardStartPositionFEN))
+
+	result := Perft(game, 5)
+
+	repr.Println(result)
 }

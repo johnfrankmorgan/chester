@@ -49,3 +49,11 @@ func sign[T constraints.Signed](value T) T {
 func isign[T constraints.Signed](value T) int {
 	return int(sign(value))
 }
+
+func ternary[T any](condition bool, tvalue, fvalue T) T {
+	if condition {
+		return tvalue
+	}
+
+	return fvalue
+}
