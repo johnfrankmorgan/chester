@@ -31,6 +31,24 @@ func (t *MoveTest) TestString() {
 	}
 }
 
+func (t *MoveTest) TestUCI() {
+	for _, test := range []struct {
+		move     Move
+		expected string
+	}{
+		{NewMove(SquareA1, SquareD1), "a1d1"},
+		{NewMove(SquareE2, SquareE4), "e2e4"},
+		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToQueen), "e4d5q"},
+		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToRook), "e4d5r"},
+		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToBishop), "e4d5b"},
+		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToKnight), "e4d5n"},
+	} {
+		t.Run(test.expected, func() {
+			t.Assert().Equal(test.expected, test.move.UCI())
+		})
+	}
+}
+
 func (t *MoveTest) TestPromotion() {
 	for _, test := range []struct {
 		move     Move

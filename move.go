@@ -37,6 +37,24 @@ func (m Move) String() string {
 	return s.String()
 }
 
+func (m Move) UCI() string {
+	suffix := ""
+
+	if m.Flags.AnySet(MoveFlagsPromote) {
+		if m.Flags.IsSet(MoveFlagsPromoteToQueen) {
+			suffix = "q"
+		} else if m.Flags.IsSet(MoveFlagsPromoteToRook) {
+			suffix = "r"
+		} else if m.Flags.IsSet(MoveFlagsPromoteToBishop) {
+			suffix = "b"
+		} else if m.Flags.IsSet(MoveFlagsPromoteToKnight) {
+			suffix = "n"
+		}
+	}
+
+	return m.From.String() + m.To.String() + suffix
+}
+
 func (m Move) Promotion() PieceKind {
 	if m.Flags.AnySet(MoveFlagsPromote) {
 		if m.Flags.IsSet(MoveFlagsPromoteToQueen) {
