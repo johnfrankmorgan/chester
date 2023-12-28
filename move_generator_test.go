@@ -325,6 +325,23 @@ func (t *MoveGeneratorTest) TestGenerate() {
 				NewMove(SquareF2, SquareE3, MoveFlagsCapture),
 			},
 		},
+
+		{
+			scenario: "pawns can't move onto squares already occupied by an enemy",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareA8: PieceBlackKing,
+				SquareB5: PieceBlackPawn,
+				SquareB4: PieceWhitePawn,
+				SquareE1: PieceWhiteKing,
+			}, func(b *Board) { b.Player = ColorWhite }),
+			expected: []Move{
+				NewMove(SquareE1, SquareD1),
+				NewMove(SquareE1, SquareF1),
+				NewMove(SquareE1, SquareD2),
+				NewMove(SquareE1, SquareE2),
+				NewMove(SquareE1, SquareF2),
+			},
+		},
 	} {
 		t.Run(test.scenario, func() {
 			moves := MoveGenerator{}.Generate(&test.board, test.opts)
