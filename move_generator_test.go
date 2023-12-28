@@ -342,6 +342,72 @@ func (t *MoveGeneratorTest) TestGenerate() {
 				NewMove(SquareE1, SquareF2),
 			},
 		},
+
+		{
+			scenario: "pawns can capture en passant",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE8: PieceBlackKing,
+				SquareD5: PieceBlackPawn,
+				SquareC5: PieceWhitePawn,
+				SquareE1: PieceWhiteKing,
+			}, func(b *Board) {
+				b.Player = ColorWhite
+				b.EnPassant = SquareD6
+			}),
+			expected: []Move{
+				NewMove(SquareE1, SquareD1),
+				NewMove(SquareE1, SquareF1),
+				NewMove(SquareE1, SquareD2),
+				NewMove(SquareE1, SquareE2),
+				NewMove(SquareE1, SquareF2),
+				NewMove(SquareC5, SquareC6),
+				NewMove(SquareC5, SquareD6, MoveFlagsCapture, MoveFlagsCaptureEnPassant),
+			},
+		},
+
+		{
+			scenario: "en passant can't reveal attacks on king (rank)",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE8: PieceBlackKing,
+				SquareD5: PieceBlackPawn,
+				SquareH5: PieceBlackRook,
+				SquareC5: PieceWhitePawn,
+				SquareA5: PieceWhiteKing,
+			}, func(b *Board) {
+				b.Player = ColorWhite
+				b.EnPassant = SquareD6
+			}),
+			expected: []Move{
+				NewMove(SquareA5, SquareA4),
+				NewMove(SquareA5, SquareA6),
+				NewMove(SquareA5, SquareB4),
+				NewMove(SquareA5, SquareB5),
+				NewMove(SquareA5, SquareB6),
+				NewMove(SquareC5, SquareC6),
+			},
+		},
+
+		{
+			scenario: "en passant can't reveal attacks on king (file)",
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareA1: PieceWhiteKing,
+				SquareC8: PieceBlackKing,
+				SquareC2: PieceWhiteRook,
+				SquareB4: PieceWhitePawn,
+				SquareC4: PieceBlackPawn,
+			}, func(b *Board) {
+				b.Player = ColorBlack
+				b.EnPassant = SquareB3
+			}),
+			expected: []Move{
+				NewMove(SquareC8, SquareB8),
+				NewMove(SquareC8, SquareD8),
+				NewMove(SquareC8, SquareB7),
+				NewMove(SquareC8, SquareC7),
+				NewMove(SquareC8, SquareD7),
+				NewMove(SquareC4, SquareC3),
+			},
+		},
 	} {
 		t.Run(test.scenario, func() {
 			moves := MoveGenerator{}.Generate(&test.board, test.opts)
@@ -358,7 +424,6 @@ func (t *MoveGeneratorTest) TestGenerate() {
 			}
 
 			t.Assert().ElementsMatch(expected, got)
-			t.Assert().ElementsMatch(test.expected, moves)
 		})
 	}
 }

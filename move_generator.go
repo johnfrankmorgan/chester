@@ -1,6 +1,8 @@
 package main
 
-import "log/slog"
+import (
+	"log/slog"
+)
 
 type MoveGenerator struct {
 	//
@@ -174,11 +176,40 @@ func (mg MoveGenerator) _pawn(board *Board, player Color, opts MoveGeneratorOpti
 		for _, dst := range Precomputed.Attacks.Pawn[player][src] {
 			if board.Bitboards.Colors[player.Opponent()].IsSet(dst.Bitboard()) && legal.IsSet(dst.Bitboard()) {
 				moves = append(moves, NewMove(src, dst, MoveFlagsCapture))
+			} else if dst == board.EnPassant {
+				ep := board.EnPassant + ternary(player == ColorWhite, DirectionSouth.Offset(), DirectionNorth.Offset())
+				capture := true
+
+				king := board.Kings[player]
+
+				orthogonal := board.Bitboards.Pieces[PieceRook] | board.Bitboards.Pieces[PieceQueen]
+				orthogonal &= board.Bitboards.Colors[player.Opponent()]
+
+				for orthogonal > 0 {
+					ortho := Square(orthogonal.PopLSB())
+
+					for _, dir := range DirectionsOrthogonal {
+						for mul := Square(1); mul <= dir.ToEdge(ortho); mul++ {
+							attack := ortho + dir.Offset()*mul
+
+							if attack == src || attack == ep {
+								continue
+							} else if king == attack {
+								capture = false
+								break
+							} else if board.Bitboards.All.IsSet(attack.Bitboard()) {
+								break
+							}
+						}
+					}
+				}
+
+				if capture {
+					moves = append(moves, NewMove(src, dst, MoveFlagsCapture, MoveFlagsCaptureEnPassant))
+				}
 			}
 		}
 	}
-
-	// TODO: en passant
 
 	return moves
 }
