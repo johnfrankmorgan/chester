@@ -3,15 +3,13 @@ version: '3'
 tasks:
   run:
     cmds:
-      - go run .
+      - go run . {{.CLI_ARGS}}
 
   lint:
     cmds:
       - go vet {{.CLI_ARGS}}
 
   test:
-    env:
-      CHESTER_LOG_LEVEL: info
     cmds:
       - go test {{.CLI_ARGS}} -coverprofile=/tmp/chester.cov
 
