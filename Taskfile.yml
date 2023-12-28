@@ -5,6 +5,10 @@ tasks:
     cmds:
       - go run .
 
+  lint:
+    cmds:
+      - go vet {{.CLI_ARGS}}
+
   test:
     cmds:
       - go test {{.CLI_ARGS}} -coverprofile=/tmp/chester.cov
