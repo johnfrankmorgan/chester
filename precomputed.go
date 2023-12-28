@@ -15,6 +15,7 @@ var Precomputed struct {
 
 	Masks struct {
 		Direction [SquareCount][DirectionCount]Bitboard
+		Alignment [SquareCount][SquareCount]Bitboard
 	}
 }
 
@@ -146,6 +147,20 @@ func init() {
 			}
 
 			Precomputed.Masks.Direction[src][dir] = ray
+		}
+	}
+
+	slog.Debug("initializing alignment masks")
+
+	for src, dirs := range Precomputed.Masks.Direction {
+		for _, mask := range dirs {
+			alignment := mask
+
+			for mask > 0 {
+				dst := mask.PopLSB()
+
+				Precomputed.Masks.Alignment[src][dst] = alignment
+			}
 		}
 	}
 }

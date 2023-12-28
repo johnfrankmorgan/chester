@@ -407,3 +407,7 @@ func (b Board) MakeMove(move Move) Board {
 
 	return b
 }
+
+func (board *Board) GenerateMoves(opts MoveGeneratorOptions) []Move {
+	return MoveGenerator{}.Generate(board, opts)
+}

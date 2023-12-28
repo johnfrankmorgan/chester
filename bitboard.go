@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/bits"
 	"strings"
 )
@@ -25,6 +26,8 @@ const (
 	BitboardRank6          = BitboardRank5 << 8
 	BitboardRank7          = BitboardRank6 << 8
 	BitboardRank8          = BitboardRank7 << 8
+
+	BitboardAll Bitboard = math.MaxUint64
 )
 
 var (

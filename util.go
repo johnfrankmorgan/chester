@@ -21,3 +21,19 @@ func abs[T constraints.Signed](value T) T {
 func iabs[T constraints.Signed](value T) int {
 	return int(abs(value))
 }
+
+func sign[T constraints.Signed](value T) T {
+	if value == 0 {
+		return 0
+	}
+
+	if value < 0 {
+		return -1
+	}
+
+	return 1
+}
+
+func isign[T constraints.Signed](value T) int {
+	return int(sign(value))
+}

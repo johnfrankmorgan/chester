@@ -1,5 +1,7 @@
 package main
 
+import "log/slog"
+
 type Direction uint8
 
 const (
@@ -69,7 +71,9 @@ var (
 )
 
 func init() {
-	for src := 0; src < len(_DirectionToEdge); src++ {
+	slog.Debug("initializing squares to edge")
+
+	for src := 0; src < SquareCount; src++ {
 		src := Square(src)
 
 		file := Square(src.File())

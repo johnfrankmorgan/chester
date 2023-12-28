@@ -37,3 +37,20 @@ func (t *UtilTest) TestAbs() {
 		})
 	}
 }
+
+func (t *UtilTest) TestSign() {
+	for _, test := range []struct {
+		value    int
+		expected int
+	}{
+		{100, 1},
+		{0, 0},
+		{-100, -1},
+		{-80, -1},
+		{123, 1},
+	} {
+		t.Run(strconv.Itoa(test.value), func() {
+			t.Assert().Equal(test.expected, isign(test.value))
+		})
+	}
+}

@@ -632,3 +632,12 @@ func (t *BoardTest) TestMakeMove() {
 		})
 	}
 }
+
+func (t *BoardTest) TestGenerateMoves() {
+	board, err := NewBoard(BoardStartPositionFEN)
+	if err != nil {
+		panic(err)
+	}
+
+	t.Assert().Len(board.GenerateMoves(MoveGeneratorOptions{}), 20)
+}
