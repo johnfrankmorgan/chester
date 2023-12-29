@@ -16,6 +16,118 @@ type MoveTest struct {
 	suite.Suite
 }
 
+func (t *MoveTest) TestNewUCIMove() {
+	for _, test := range []struct {
+		board    Board
+		move     string
+		err      string
+		expected Move
+	}{
+		{
+			board:    must(NewBoard(BoardStartPositionFEN)),
+			move:     "a2a4",
+			expected: NewMove(SquareA2, SquareA4, MoveFlagsDoublePawnPush),
+		},
+		{
+			board:    must(NewBoard(BoardStartPositionFEN)),
+			move:     "a2a3q",
+			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToQueen),
+		},
+		{
+			board:    must(NewBoard(BoardStartPositionFEN)),
+			move:     "a2a3r",
+			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToRook),
+		},
+		{
+			board:    must(NewBoard(BoardStartPositionFEN)),
+			move:     "a2a3b",
+			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToBishop),
+		},
+		{
+			board:    must(NewBoard(BoardStartPositionFEN)),
+			move:     "a2a3n",
+			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToKnight),
+		},
+		{
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE8: PieceBlackKing,
+			}, nil),
+			move:     "e8g8",
+			expected: NewMove(SquareE8, SquareG8, MoveFlagsCastleKingside),
+		},
+		{
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE1: PieceWhiteKing,
+			}, nil),
+			move:     "e1c1",
+			expected: NewMove(SquareE1, SquareC1, MoveFlagsCastleQueenside),
+		},
+		{
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE1: PieceWhiteRook,
+				SquareA1: PieceBlackPawn,
+			}, nil),
+			move:     "e1a1",
+			expected: NewMove(SquareE1, SquareA1, MoveFlagsCapture),
+		},
+		{
+			board: SetupTestBoard([SquareCount]Piece{
+				SquareE5: PieceWhitePawn,
+			}, nil),
+			move:     "e5d6",
+			expected: NewMove(SquareE5, SquareD6, MoveFlagsCapture, MoveFlagsCaptureEnPassant),
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "a",
+			err:   "invalid move: a",
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "a2sdfssl",
+			err:   "invalid move: a2sdfssl",
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "s1d2",
+			err:   "invalid source file: s",
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "asd2",
+			err:   "invalid source rank: s",
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "a122",
+			err:   "invalid destination file: 2",
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "a1d9",
+			err:   "invalid destination rank: 9",
+		},
+		{
+			board: must(NewBoard(BoardStartPositionFEN)),
+			move:  "a1d8k",
+			err:   "invalid promotion: k",
+		},
+	} {
+		t.Run(test.move, func() {
+			move, err := NewUCIMove(&test.board, test.move)
+
+			if test.err != "" {
+				t.Assert().ErrorIs(err, ErrUCI)
+				t.Assert().ErrorContains(err, test.err)
+			} else {
+				t.Assert().NoError(err)
+			}
+
+			t.Assert().Equal(test.expected, move)
+		})
+	}
+}
+
 func (t *MoveTest) TestString() {
 	for _, test := range []struct {
 		move     Move

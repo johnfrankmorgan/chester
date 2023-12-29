@@ -12,6 +12,7 @@ func main() {
 		Debug bool `help:"Enable debug logging."`
 
 		Divide CommandDivide `cmd:""`
+		UCI    CommandUCI    `cmd:""`
 	}{}
 
 	ctx := kong.Parse(&cli)
