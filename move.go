@@ -160,3 +160,7 @@ func (m Move) Promotion() PieceKind {
 
 	return PieceNone
 }
+
+func (m Move) IsZero() bool {
+	return m == Move{}
+}

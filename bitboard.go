@@ -129,6 +129,10 @@ func (b *Bitboard) Set(bits Bitboard) {
 	*b |= bits
 }
 
+func (b Bitboard) SetCount() int {
+	return bits.OnesCount64(uint64(b))
+}
+
 func (b *Bitboard) Clear(bits Bitboard) {
 	*b &= ^bits
 }

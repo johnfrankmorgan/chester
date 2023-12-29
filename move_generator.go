@@ -1,7 +1,9 @@
 package main
 
 import (
+	"cmp"
 	"log/slog"
+	"slices"
 )
 
 type MoveGenerator struct {
@@ -10,6 +12,7 @@ type MoveGenerator struct {
 
 type MoveGeneratorOptions struct {
 	CapturesOnly bool
+	HashMove     Move
 }
 
 func (mg MoveGenerator) Generate(board *Board, opts MoveGeneratorOptions) []Move {
@@ -25,7 +28,38 @@ func (mg MoveGenerator) Generate(board *Board, opts MoveGeneratorOptions) []Move
 		moves = mg._pawn(board, player, opts, moves)
 	}
 
+	return mg._sort(board, moves, opts)
+}
+
+func (mg MoveGenerator) _sort(board *Board, moves []Move, opts MoveGeneratorOptions) []Move {
+	slices.SortFunc(moves, func(a, b Move) int {
+		return cmp.Compare(mg._score(board, a, opts), mg._score(board, b, opts))
+	})
+
 	return moves
+}
+
+func (mg MoveGenerator) _score(board *Board, move Move, opts MoveGeneratorOptions) int {
+	if move == opts.HashMove {
+		return 1000000000
+	}
+
+	score := 0
+
+	// TODO
+
+	if move.Flags.IsSet(MoveFlagsCapture) {
+		from := board.Pieces[move.From]
+		to := board.Pieces[move.To]
+
+		score += to.Kind().Value() - from.Kind().Value()
+	}
+
+	if move.Flags.AnySet(MoveFlagsPromote) {
+		score += move.Promotion().Value()
+	}
+
+	return score
 }
 
 func (mg MoveGenerator) _king(board *Board, player Color, opts MoveGeneratorOptions, moves []Move) []Move {

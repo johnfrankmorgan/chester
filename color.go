@@ -27,9 +27,5 @@ func (c Color) Valid() bool {
 }
 
 func (c Color) Opponent() Color {
-	if c == ColorBlack {
-		return ColorWhite
-	}
-
-	return ColorBlack
+	return c ^ ColorWhite
 }
