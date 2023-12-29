@@ -19,12 +19,15 @@ type Board struct {
 		Pieces PieceTable[Bitboard]
 	}
 	Castling  ColorTable[struct{ Kingside, Queenside bool }]
+	Castled   ColorTable[bool]
 	EnPassant Square
 	Moves     struct {
 		Half int
 		Full int
 		Last Move
 	}
+
+	_zobrist uint64
 }
 
 const BoardStartPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -298,6 +301,7 @@ func (b *Board) FEN() string {
 func (b Board) MakeMove(move Move) Board {
 	slog.Debug("making move", "move", move)
 
+	b._zobrist = 0
 	b.EnPassant = 0
 	b.Moves.Last = move
 
@@ -345,6 +349,8 @@ func (b Board) MakeMove(move Move) Board {
 
 			b.Bitboards.Pieces[PieceRook].Clear(rook.src.Bitboard())
 			b.Bitboards.Pieces[PieceRook].Set(rook.dst.Bitboard())
+
+			b.Castled[color] = true
 		}
 	} else if piece.Is(PiecePawn) {
 		if promotion := move.Promotion(); promotion != PieceNone {
@@ -421,4 +427,36 @@ func (b Board) MakeMove(move Move) Board {
 
 func (board *Board) GenerateMoves(opts MoveGeneratorOptions) []Move {
 	return MoveGenerator{}.Generate(board, opts)
+}
+
+func (board *Board) Zobrist() uint64 {
+	if board._zobrist == 0 {
+		zobrist := uint64(0)
+
+		zobrist ^= Precomputed.Zobrist.Players[board.Player]
+
+		for src, piece := range board.Pieces {
+			if !piece.Is(PieceNone) {
+				zobrist ^= Precomputed.Zobrist.Pieces[piece.Color()][piece.Kind()][src]
+			}
+		}
+
+		for color, castling := range board.Castling {
+			if castling.Kingside {
+				zobrist ^= Precomputed.Zobrist.Castling[color].Kingside
+			}
+
+			if castling.Queenside {
+				zobrist ^= Precomputed.Zobrist.Castling[color].Queenside
+			}
+		}
+
+		if board.EnPassant != 0 {
+			zobrist ^= Precomputed.Zobrist.EnPassant[board.EnPassant]
+		}
+
+		board._zobrist = zobrist
+	}
+
+	return board._zobrist
 }

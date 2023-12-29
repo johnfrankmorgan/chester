@@ -19,6 +19,10 @@ func (g *Game) Board() *Board {
 	return &g._boards[len(g._boards)-1]
 }
 
+func (g *Game) Boards() []Board {
+	return g._boards
+}
+
 func (g *Game) MakeMove(move Move) {
 	g._boards = append(g._boards, g.Board().MakeMove(move))
 }

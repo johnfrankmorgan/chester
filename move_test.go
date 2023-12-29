@@ -177,3 +177,17 @@ func (t *MoveTest) TestPromotion() {
 		})
 	}
 }
+
+func (t *MoveTest) TestIsZero() {
+	for _, test := range []struct {
+		move     Move
+		expected bool
+	}{
+		{Move{}, true},
+		{NewMove(SquareA1, SquareA2), false},
+	} {
+		t.Run(test.move.String(), func() {
+			t.Assert().Equal(test.expected, test.move.IsZero())
+		})
+	}
+}

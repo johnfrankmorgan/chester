@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"strings"
+	"time"
 
 	"log/slog"
 )
@@ -13,8 +14,15 @@ import (
 type CommandUCI struct {
 	CommandIO
 
-	sc   *bufio.Scanner
-	game *Game
+	Depth          int           `default:"4" help:"Depth to search to."`
+	OpeningBook    bool          `default:"true" negatable:"true" help:"Enable opening book."`
+	Transpositions bool          `default:"true" negatable:"true" help:"Enable transposition cache."`
+	ThinkTime      time.Duration `default:"600ms" help:"Thinking time."`
+
+	sc        *bufio.Scanner
+	game      *Game
+	searching bool
+	cancel    func()
 }
 
 var (
@@ -100,8 +108,8 @@ func (cmd *CommandUCI) run() error {
 	case "go":
 		return cmd.RunGo(command)
 
-	// case "stop":
-	// 	return nil
+	case "stop":
+		return cmd.RunStop(command)
 
 	default:
 		slog.Error("unknown command", "command", command)
@@ -165,11 +173,37 @@ func (cmd *CommandUCI) RunPosition(command []string) error {
 }
 
 func (cmd *CommandUCI) RunGo(command []string) error {
-	moves := cmd.game.Board().GenerateMoves(MoveGeneratorOptions{})
+	slog.Info("searching", "timeout", cmd.ThinkTime, "command", command)
 
-	move := moves[rand.Intn(len(moves))]
+	go func() {
+		cmd.searching = true
 
-	slog.Info("selected random move", "move", move)
+		ctx, cancel := context.WithTimeout(context.Background(), cmd.ThinkTime)
+		defer cancel()
 
-	return cmd.send("bestmove %s", move.UCI())
+		cmd.cancel = cancel
+
+		move, _ := NewSearcher(cmd.game, SearchOptions{
+			Depth:          cmd.Depth,
+			OpeningBook:    cmd.OpeningBook,
+			Transpositions: cmd.Transpositions,
+		}).Search(ctx)
+
+		check(cmd.send("bestmove %s", move.UCI()))
+		cmd.searching = false
+		cmd.cancel = nil
+	}()
+
+	return nil
+}
+
+func (cmd *CommandUCI) RunStop(command []string) error {
+	if !cmd.searching {
+		slog.Error("can't stop, not searching", "command", command)
+		return nil
+	}
+
+	cmd.cancel()
+
+	return nil
 }

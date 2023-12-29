@@ -17,6 +17,15 @@ const (
 	_PieceCountIncludingNone = PieceCount + 1
 )
 
+var _PieceKindValues = [...]int{
+	PiecePawn:   100,
+	PieceKnight: 320,
+	PieceBishop: 330,
+	PieceRook:   500,
+	PieceQueen:  900,
+	PieceKing:   20000,
+}
+
 func (pk PieceKind) String() string {
 	switch pk {
 	case PiecePawn:
@@ -40,4 +49,8 @@ func (pk PieceKind) String() string {
 	default:
 		return istr(pk)
 	}
+}
+
+func (pk PieceKind) Value() int {
+	return _PieceKindValues[pk]
 }
