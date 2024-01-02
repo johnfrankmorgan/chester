@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+  lint:
+    cmds:
+      - go vet ./...
+
+  test:
+    cmds:
+      - go test ./... -coverprofile=/tmp/chester.cov
+
+  test-coverage:
+    deps: [test]
+    cmds:
+      - go tool cover -func=/tmp/chester.cov
+
+  test-coverage-html:
+    deps: [test]
+    cmds:
+      - go tool cover -html=/tmp/chester.cov
