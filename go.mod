@@ -3,6 +3,7 @@ module github.com/johnfrankmorgan/chester
 go 1.21.3
 
 require (
+	github.com/alecthomas/kong v0.8.1
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 )
