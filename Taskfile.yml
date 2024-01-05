@@ -1,0 +1,24 @@
+version: '3'
+
+tasks:
+  run:
+    cmds:
+      - go run . {{.CLI_ARGS}}
+
+  lint:
+    cmds:
+      - go vet {{.CLI_ARGS}}
+
+  test:
+    cmds:
+      - go test {{.CLI_ARGS}} -coverprofile=/tmp/chester.cov
+
+  test-coverage:
+    deps: [test]
+    cmds:
+      - go tool cover -func=/tmp/chester.cov
+
+  test-coverage-html:
+    deps: [test]
+    cmds:
+      - go tool cover -html=/tmp/chester.cov
