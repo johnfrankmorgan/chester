@@ -29,3 +29,11 @@ func Must[T any](value T, err error) T {
 
 	return value
 }
+
+func Abs[T constraints.Signed](value T) T {
+	if value < 0 {
+		return -value
+	}
+
+	return value
+}

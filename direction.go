@@ -3,7 +3,7 @@ package main
 type Direction uint8
 
 const (
-	DirectionNorth = iota
+	DirectionNorth Direction = iota
 	DirectionSouth
 	DirectionEast
 	DirectionWest

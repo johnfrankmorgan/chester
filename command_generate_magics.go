@@ -13,6 +13,8 @@ type CommandGenerateMagics struct {
 	Output     string `arg:"" type:"path" help:"Output path."`
 	Orthogonal bool   `default:"true" negatable:"true" help:"Generate magics for orthogonal moves."`
 	Diagonal   bool   `default:"true" negatable:"true" help:"Generate magics for diagonal moves."`
+	King       bool   `default:"true" negatable:"true" help:"Generate king moves."`
+	Knight     bool   `default:"true" negatable:"true" help:"Generate king moves."`
 }
 
 func (cmd CommandGenerateMagics) Run() error {
@@ -31,13 +33,14 @@ func (cmd CommandGenerateMagics) Run() error {
 func (cmd CommandGenerateMagics) run() Magics {
 	magics := Magics{}
 
-	for mul, dirs := range [][]Direction{DirectionsOrthogonal[:], DirectionsDiagonal[:]} {
+	for _, dirs := range [][]Direction{DirectionsOrthogonal[:], DirectionsDiagonal[:]} {
 		if !cmd.Orthogonal && !dirs[0].IsDiagonal() {
 			continue
 		} else if !cmd.Diagonal && dirs[0].IsDiagonal() {
 			continue
 		}
 
+		dest := Ternary(dirs[0].IsDiagonal(), &magics.diagonal, &magics.orthogonal)
 		kind := Ternary(dirs[0].IsDiagonal(), "diagonal", "orthogonal")
 		total := struct {
 			attempts int
@@ -55,7 +58,7 @@ func (cmd CommandGenerateMagics) run() Magics {
 
 			duration := time.Since(start)
 
-			magics[src+Square(mul*SquareCount)] = entry
+			dest[src] = entry
 
 			slog.Debug("generated", "kind", kind, "square", src, "attempts", attempts, "duration", duration)
 
@@ -66,9 +69,76 @@ func (cmd CommandGenerateMagics) run() Magics {
 		slog.Info("generated", "kind", kind, "attempts", total.attempts, "duration", total.duration)
 	}
 
+	if cmd.King {
+		slog.Info("generating", "kind", "king")
+
+		start := time.Now()
+
+		for src := SquareFirst; src <= SquareLast; src++ {
+			moves := Bitboard(0)
+
+			for _, dir := range Directions {
+				if dir.ToEdge(src) != 0 {
+					dst := src + dir.Offset()
+
+					moves.Set(dst.Bitboard())
+				}
+			}
+
+			magics.king[src] = moves
+		}
+
+		slog.Info("generated", "kind", "king", "duration", time.Since(start))
+	}
+
+	if cmd.Knight {
+		slog.Info("generating", "kind", "knight")
+
+		start := time.Now()
+		jumps := [...]Square{
+			DirectionNorth.Offset()*2 + DirectionEast.Offset(),
+			DirectionNorth.Offset()*2 + DirectionWest.Offset(),
+			DirectionSouth.Offset()*2 + DirectionEast.Offset(),
+			DirectionSouth.Offset()*2 + DirectionWest.Offset(),
+			DirectionEast.Offset()*2 + DirectionNorth.Offset(),
+			DirectionEast.Offset()*2 + DirectionSouth.Offset(),
+			DirectionWest.Offset()*2 + DirectionNorth.Offset(),
+			DirectionWest.Offset()*2 + DirectionSouth.Offset(),
+		}
+
+		for src := SquareFirst; src <= SquareLast; src++ {
+			moves := Bitboard(0)
+
+			for _, jump := range jumps {
+				dst := src + jump
+
+				if !dst.Valid() {
+					continue
+				}
+
+				if Abs(src.File()-dst.File()) > 2 {
+					continue
+				}
+
+				if Abs(src.Rank()-dst.Rank()) > 2 {
+					continue
+				}
+
+				moves.Set(dst.Bitboard())
+			}
+
+			magics.knight[src] = moves
+		}
+
+		slog.Info("generated", "kind", "knight", "duration", time.Since(start))
+	}
+
 	return magics
 }
 
+// https://www.chessprogramming.org/Magic_Bitboards
+// https://www.chessprogramming.org/Looking_for_Magics
+// https://analog-hors.github.io/site/magic-bitboards/
 func (cmd CommandGenerateMagics) generate(dirs []Direction, src Square, shift uint8) (MagicEntry, int) {
 	for attempts := 1; ; attempts++ {
 		entry := MagicEntry{

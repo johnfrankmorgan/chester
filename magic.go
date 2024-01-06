@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"io"
+	"unsafe"
 
 	_ "embed"
 )
@@ -27,7 +28,36 @@ func (e MagicEntry) Get(blockers Bitboard) Bitboard {
 	return e.Moves[e.Index(blockers)]
 }
 
-type Magics [SquareCount * 2]MagicEntry
+type Magics struct {
+	orthogonal [SquareCount]MagicEntry
+	diagonal   [SquareCount]MagicEntry
+	king       [SquareCount]Bitboard
+	knight     [SquareCount]Bitboard
+}
+
+func (m Magics) GobEncode() ([]byte, error) {
+	e := *(*struct {
+		Orthogonal, Diagonal [SquareCount]MagicEntry
+		King, Knight         [SquareCount]Bitboard
+	})(unsafe.Pointer(&m))
+
+	b := bytes.NewBuffer(nil)
+	err := gob.NewEncoder(b).Encode(e)
+
+	return b.Bytes(), err
+}
+
+func (m *Magics) GobDecode(b []byte) error {
+	e := struct {
+		Orthogonal, Diagonal [SquareCount]MagicEntry
+		King, Knight         [SquareCount]Bitboard
+	}{}
+
+	err := gob.NewDecoder(bytes.NewReader(b)).Decode(&e)
+	*m = *(*Magics)(unsafe.Pointer(&e))
+
+	return err
+}
 
 var (
 	Magic Magics
@@ -51,9 +81,17 @@ func (m *Magics) LoadDefault() error {
 }
 
 func (m *Magics) Orthogonal(src Square, blockers Bitboard) Bitboard {
-	return m[src].Get(blockers)
+	return m.orthogonal[src].Get(blockers)
 }
 
 func (m *Magics) Diagonal(src Square, blockers Bitboard) Bitboard {
-	return m[src+SquareCount].Get(blockers)
+	return m.diagonal[src].Get(blockers)
+}
+
+func (m *Magics) King(src Square) Bitboard {
+	return m.king[src]
+}
+
+func (m *Magics) Knight(src Square) Bitboard {
+	return m.knight[src]
 }

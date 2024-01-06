@@ -74,11 +74,56 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 				t.Assert().Equal(SquareG8.Bitboard()|SquareH7.Bitboard(), moves)
 			},
 		},
+		{
+			name: "king generation",
+			cmd: CommandGenerateMagics{
+				Output: "/tmp/chester.king.gob",
+				King:   true,
+			},
+			assert: func(t *CommandGenerateMagicsTest, cmd CommandGenerateMagics, err error) {
+				t.Assert().NoError(err)
+
+				magics := Must(os.Open(cmd.Output))
+				defer magics.Close()
+
+				PanicIfError(Magic.Load(magics))
+
+				expected := SquareD4.Bitboard() |
+					SquareD5.Bitboard() |
+					SquareE5.Bitboard() |
+					SquareF5.Bitboard() |
+					SquareF4.Bitboard() |
+					SquareF3.Bitboard() |
+					SquareE3.Bitboard() |
+					SquareD3.Bitboard()
+
+				t.Assert().Equal(expected, Magic.King(SquareE4))
+			},
+		},
+		{
+			name: "knight generation",
+			cmd: CommandGenerateMagics{
+				Output: "/tmp/chester.knight.gob",
+				Knight: true,
+			},
+			assert: func(t *CommandGenerateMagicsTest, cmd CommandGenerateMagics, err error) {
+				t.Assert().NoError(err)
+
+				magics := Must(os.Open(cmd.Output))
+				defer magics.Close()
+
+				PanicIfError(Magic.Load(magics))
+
+				t.Assert().Equal(SquareA3.Bitboard()|SquareC3.Bitboard()|SquareD2.Bitboard(), Magic.Knight(SquareB1))
+			},
+		},
 	} {
 		t.Run(test.name, func() {
 			if test.skip {
 				t.T().SkipNow()
 			}
+
+			defer os.Remove(test.cmd.Output)
 
 			err := test.cmd.Run()
 
