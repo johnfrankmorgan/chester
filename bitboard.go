@@ -1,11 +1,34 @@
 package main
 
 import (
+	"math"
 	"math/bits"
 	"strings"
 )
 
 type Bitboard uint64
+
+const (
+	BitboardAll Bitboard = math.MaxUint64
+
+	BitboardFileA Bitboard = 0x101010101010101
+	BitboardFileB          = BitboardFileA << 1
+	BitboardFileC          = BitboardFileB << 1
+	BitboardFileD          = BitboardFileC << 1
+	BitboardFileE          = BitboardFileD << 1
+	BitboardFileF          = BitboardFileE << 1
+	BitboardFileG          = BitboardFileF << 1
+	BitboardFileH          = BitboardFileG << 1
+
+	BitboardRank1 Bitboard = 0b11111111
+	BitboardRank2          = BitboardRank1 << 8
+	BitboardRank3          = BitboardRank2 << 8
+	BitboardRank4          = BitboardRank3 << 8
+	BitboardRank5          = BitboardRank4 << 8
+	BitboardRank6          = BitboardRank5 << 8
+	BitboardRank7          = BitboardRank6 << 8
+	BitboardRank8          = BitboardRank7 << 8
+)
 
 func (b Bitboard) String() string {
 	s := strings.Builder{}

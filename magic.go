@@ -33,12 +33,14 @@ type Magics struct {
 	diagonal   [SquareCount]MagicEntry
 	king       [SquareCount]Bitboard
 	knight     [SquareCount]Bitboard
+	pawn       [ColorCount][SquareCount]Bitboard
 }
 
 func (m Magics) GobEncode() ([]byte, error) {
 	e := *(*struct {
 		Orthogonal, Diagonal [SquareCount]MagicEntry
 		King, Knight         [SquareCount]Bitboard
+		Pawn                 [ColorCount][SquareCount]Bitboard
 	})(unsafe.Pointer(&m))
 
 	b := bytes.NewBuffer(nil)
@@ -51,6 +53,7 @@ func (m *Magics) GobDecode(b []byte) error {
 	e := struct {
 		Orthogonal, Diagonal [SquareCount]MagicEntry
 		King, Knight         [SquareCount]Bitboard
+		Pawn                 [ColorCount][SquareCount]Bitboard
 	}{}
 
 	err := gob.NewDecoder(bytes.NewReader(b)).Decode(&e)
@@ -94,4 +97,8 @@ func (m *Magics) King(src Square) Bitboard {
 
 func (m *Magics) Knight(src Square) Bitboard {
 	return m.knight[src]
+}
+
+func (m *Magics) PawnAttacks(color Color, src Square) Bitboard {
+	return m.pawn[color][src]
 }

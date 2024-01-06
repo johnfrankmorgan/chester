@@ -15,6 +15,7 @@ type CommandGenerateMagics struct {
 	Diagonal   bool   `default:"true" negatable:"true" help:"Generate magics for diagonal moves."`
 	King       bool   `default:"true" negatable:"true" help:"Generate king moves."`
 	Knight     bool   `default:"true" negatable:"true" help:"Generate king moves."`
+	Pawn       bool   `default:"true" negatable:"true" help:"Generate pawn attacks."`
 }
 
 func (cmd CommandGenerateMagics) Run() error {
@@ -131,6 +132,40 @@ func (cmd CommandGenerateMagics) run() Magics {
 		}
 
 		slog.Info("generated", "kind", "knight", "duration", time.Since(start))
+	}
+
+	if cmd.Pawn {
+		slog.Info("generating", "kind", "pawn")
+
+		start := time.Now()
+
+		for _, color := range []Color{ColorWhite, ColorBlack} {
+			for src := SquareFirst; src <= SquareLast; src++ {
+				if src.Rank() == Rank8 || src.Rank() == Rank1 {
+					continue
+				}
+
+				attacks := Bitboard(0)
+
+				dirs := Ternary(
+					color == ColorWhite,
+					[]Direction{DirectionNorthEast, DirectionNorthWest},
+					[]Direction{DirectionSouthEast, DirectionSouthWest},
+				)
+
+				for _, dir := range dirs {
+					if dir.ToEdge(src) != 0 {
+						dst := src + dir.Offset()
+
+						attacks.Set(dst.Bitboard())
+					}
+				}
+
+				magics.pawn[color][src] = attacks
+			}
+		}
+
+		slog.Info("generated", "kind", "pawn", "duration", time.Since(start))
 	}
 
 	return magics
