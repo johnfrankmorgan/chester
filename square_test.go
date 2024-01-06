@@ -102,6 +102,36 @@ func (t *SquareTest) TestBitboard() {
 	}
 }
 
+func (t *SquareTest) TestAlignMask() {
+	for src := SquareFirst; src < SquareLast; src++ {
+		for dst := SquareFirst; dst < SquareLast; dst++ {
+			mask := src.AlignMask(dst)
+
+			if mask == 0 {
+				continue
+			}
+
+			t.Run(src.String()+dst.String(), func() {
+				t.Assert().True(mask.IsSet(src.Bitboard()))
+				t.Assert().True(mask.IsSet(dst.Bitboard()))
+			})
+		}
+	}
+
+	for _, test := range []struct {
+		src      Square
+		dst      Square
+		expected Bitboard
+	}{
+		{SquareA3, SquareD3, BitboardRank3},
+		{SquareE2, SquareE7, BitboardFileE},
+	} {
+		t.Run(test.src.String()+test.dst.String(), func() {
+			t.Assert().Equal(test.expected, test.src.AlignMask(test.dst))
+		})
+	}
+}
+
 func TestFile(t *testing.T) {
 	t.Parallel()
 

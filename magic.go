@@ -83,19 +83,19 @@ func (m *Magics) LoadDefault() error {
 	return m.Load(bytes.NewReader(_magraw))
 }
 
-func (m *Magics) Orthogonal(src Square, blockers Bitboard) Bitboard {
+func (m *Magics) OrthogonalMoves(src Square, blockers Bitboard) Bitboard {
 	return m.orthogonal[src].Get(blockers)
 }
 
-func (m *Magics) Diagonal(src Square, blockers Bitboard) Bitboard {
+func (m *Magics) DiagonalMoves(src Square, blockers Bitboard) Bitboard {
 	return m.diagonal[src].Get(blockers)
 }
 
-func (m *Magics) King(src Square) Bitboard {
+func (m *Magics) KingMoves(src Square) Bitboard {
 	return m.king[src]
 }
 
-func (m *Magics) Knight(src Square) Bitboard {
+func (m *Magics) KnightMoves(src Square) Bitboard {
 	return m.knight[src]
 }
 

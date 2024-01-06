@@ -74,6 +74,10 @@ const (
 	SquareCount = FileCount * RankCount
 )
 
+var (
+	_SquareAlignMasks [SquareCount][SquareCount]Bitboard
+)
+
 type File int8
 
 const (
@@ -110,6 +114,21 @@ const (
 	RankCount = 8
 )
 
+func init() {
+	for src := SquareFirst; src <= SquareLast; src++ {
+		for _, dir := range Directions {
+			mask := dir.Mask(src)
+			alignment := mask
+
+			for mask > 0 {
+				dst := Square(mask.PopLSB())
+
+				_SquareAlignMasks[src][dst] = alignment
+			}
+		}
+	}
+}
+
 func NewSquare(file File, rank Rank) Square {
 	return Square(rank*FileCount) + Square(file)
 }
@@ -136,6 +155,10 @@ func (s Square) Rank() Rank {
 
 func (s Square) Bitboard() Bitboard {
 	return 1 << Bitboard(s)
+}
+
+func (s Square) AlignMask(other Square) Bitboard {
+	return _SquareAlignMasks[s][other]
 }
 
 func (f File) String() string {

@@ -68,7 +68,7 @@ func (p Piece) Color() Color {
 }
 
 func (p Piece) Kind() PieceKind {
-	return PieceKind(p &^ _PieceColorMask)
+	return PieceKind(p & ^_PieceColorMask)
 }
 
 func (p Piece) Is(kind PieceKind) bool {

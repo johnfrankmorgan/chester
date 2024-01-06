@@ -118,3 +118,63 @@ func (t *DirectionTest) TestIsDiagonal() {
 		})
 	}
 }
+
+func (t *DirectionTest) TestMask() {
+	for _, test := range []struct {
+		dir      Direction
+		src      Square
+		expected Bitboard
+	}{
+		{
+			dir:      DirectionNorth,
+			src:      SquareA1,
+			expected: BitboardFileA,
+		},
+		{
+			dir: DirectionNorthEast,
+			src: SquareA1,
+			expected: SquareA1.Bitboard() |
+				SquareB2.Bitboard() |
+				SquareC3.Bitboard() |
+				SquareD4.Bitboard() |
+				SquareE5.Bitboard() |
+				SquareF6.Bitboard() |
+				SquareG7.Bitboard() |
+				SquareH8.Bitboard(),
+		},
+		{
+			dir:      DirectionSouth,
+			src:      SquareB2,
+			expected: BitboardFileB,
+		},
+		{
+			dir:      DirectionNorth,
+			src:      SquareH8,
+			expected: BitboardFileH,
+		},
+		{
+			dir:      DirectionWest,
+			src:      SquareE4,
+			expected: BitboardRank4,
+		},
+		{
+			dir:      DirectionEast,
+			src:      SquareE4,
+			expected: BitboardRank4,
+		},
+		{
+			dir: DirectionNorthWest,
+			src: SquareE2,
+			expected: SquareF1.Bitboard() |
+				SquareE2.Bitboard() |
+				SquareD3.Bitboard() |
+				SquareC4.Bitboard() |
+				SquareB5.Bitboard() |
+				SquareA6.Bitboard(),
+		},
+	} {
+		t.Run(fmt.Sprintf("%s(%s)", test.src, test.dir), func() {
+			t.Assert().Equal(test.expected, test.dir.Mask(test.src))
+		})
+	}
+}

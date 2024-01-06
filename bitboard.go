@@ -30,6 +30,30 @@ const (
 	BitboardRank8          = BitboardRank7 << 8
 )
 
+var (
+	BitboardFiles = [...]Bitboard{
+		FileA: BitboardFileA,
+		FileB: BitboardFileB,
+		FileC: BitboardFileC,
+		FileD: BitboardFileD,
+		FileE: BitboardFileE,
+		FileF: BitboardFileF,
+		FileG: BitboardFileG,
+		FileH: BitboardFileH,
+	}
+
+	BitboardRanks = [...]Bitboard{
+		Rank1: BitboardRank1,
+		Rank2: BitboardRank2,
+		Rank3: BitboardRank3,
+		Rank4: BitboardRank4,
+		Rank5: BitboardRank5,
+		Rank6: BitboardRank6,
+		Rank7: BitboardRank7,
+		Rank8: BitboardRank8,
+	}
+)
+
 func (b Bitboard) String() string {
 	s := strings.Builder{}
 

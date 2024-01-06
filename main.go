@@ -15,6 +15,7 @@ func main() {
 		} `embed:"" prefix:"log-"`
 
 		GenerateMagics CommandGenerateMagics `cmd:"" help:"Generate magic bitboards."`
+		Perft          CommandPerft          `cmd:"" help:"Run Perft."`
 	}
 
 	ctx := kong.Parse(&cli)

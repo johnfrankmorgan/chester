@@ -50,7 +50,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 
 				PanicIfError(Magic.Load(magics))
 
-				moves := Magic.Diagonal(SquareH8, SquareG7.Bitboard()|SquareH7.Bitboard()|SquareG8.Bitboard())
+				moves := Magic.DiagonalMoves(SquareH8, SquareG7.Bitboard()|SquareH7.Bitboard()|SquareG8.Bitboard())
 				t.Assert().Equal(SquareG7.Bitboard(), moves)
 			},
 		},
@@ -70,7 +70,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 
 				PanicIfError(Magic.Load(magics))
 
-				moves := Magic.Orthogonal(SquareH8, SquareG7.Bitboard()|SquareH7.Bitboard()|SquareG8.Bitboard())
+				moves := Magic.OrthogonalMoves(SquareH8, SquareG7.Bitboard()|SquareH7.Bitboard()|SquareG8.Bitboard())
 				t.Assert().Equal(SquareG8.Bitboard()|SquareH7.Bitboard(), moves)
 			},
 		},
@@ -98,7 +98,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 					SquareE3.Bitboard() |
 					SquareD3.Bitboard()
 
-				t.Assert().Equal(expected, Magic.King(SquareE4))
+				t.Assert().Equal(expected, Magic.KingMoves(SquareE4))
 			},
 		},
 
@@ -116,7 +116,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 
 				PanicIfError(Magic.Load(magics))
 
-				t.Assert().Equal(SquareA3.Bitboard()|SquareC3.Bitboard()|SquareD2.Bitboard(), Magic.Knight(SquareB1))
+				t.Assert().Equal(SquareA3.Bitboard()|SquareC3.Bitboard()|SquareD2.Bitboard(), Magic.KnightMoves(SquareB1))
 			},
 		},
 

@@ -16,7 +16,7 @@ type MagicsTest struct {
 	suite.Suite
 }
 
-func (t *MagicsTest) TestDiagonal() {
+func (t *MagicsTest) TestDiagonalMoves() {
 	for _, test := range []struct {
 		src      Square
 		blockers Bitboard
@@ -57,14 +57,14 @@ func (t *MagicsTest) TestDiagonal() {
 		},
 	} {
 		t.Run(test.src.String(), func() {
-			moves := Magic.Diagonal(test.src, test.blockers)
+			moves := Magic.DiagonalMoves(test.src, test.blockers)
 
 			t.Assert().Equal(test.expected, moves)
 		})
 	}
 }
 
-func (t *MagicsTest) TestOrthogonal() {
+func (t *MagicsTest) TestOrthogonalMoves() {
 	for _, test := range []struct {
 		src      Square
 		blockers Bitboard
@@ -104,14 +104,14 @@ func (t *MagicsTest) TestOrthogonal() {
 		},
 	} {
 		t.Run(test.src.String(), func() {
-			moves := Magic.Orthogonal(test.src, test.blockers)
+			moves := Magic.OrthogonalMoves(test.src, test.blockers)
 
 			t.Assert().Equal(test.expected, moves)
 		})
 	}
 }
 
-func (t *MagicsTest) TestKing() {
+func (t *MagicsTest) TestKingMoves() {
 	for _, test := range []struct {
 		src      Square
 		expected Bitboard
@@ -129,14 +129,14 @@ func (t *MagicsTest) TestKing() {
 		},
 	} {
 		t.Run(test.src.String(), func() {
-			moves := Magic.King(test.src)
+			moves := Magic.KingMoves(test.src)
 
 			t.Assert().Equal(test.expected, moves)
 		})
 	}
 }
 
-func (t *MagicsTest) TestKnight() {
+func (t *MagicsTest) TestKnightMoves() {
 	for _, test := range []struct {
 		src      Square
 		expected Bitboard
@@ -160,7 +160,7 @@ func (t *MagicsTest) TestKnight() {
 		},
 	} {
 		t.Run(test.src.String(), func() {
-			moves := Magic.Knight(test.src)
+			moves := Magic.KnightMoves(test.src)
 
 			t.Assert().Equal(test.expected, moves)
 		})

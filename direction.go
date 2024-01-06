@@ -66,6 +66,7 @@ var (
 	}
 
 	_DirectionToEdge [SquareCount][DirectionCount]Square
+	_DirectionMasks  [SquareCount][DirectionCount]Bitboard
 )
 
 func init() {
@@ -88,7 +89,39 @@ func init() {
 			DirectionNorthWest: min(north, west),
 			DirectionSouthWest: min(south, west),
 		}
+
+		_DirectionMasks[src] = [DirectionCount]Bitboard{
+			DirectionNorth: BitboardFiles[src.File()],
+			DirectionSouth: BitboardFiles[src.File()],
+			DirectionEast:  BitboardRanks[src.Rank()],
+			DirectionWest:  BitboardRanks[src.Rank()],
+		}
+
+		for _, dir := range DirectionsDiagonal {
+			ray := src.Bitboard()
+
+			for _, off := range [...]Square{dir.Offset(), dir.Opposite().Offset()} {
+				src := src
+
+				for {
+					dst := src + off
+
+					if !dst.Valid() {
+						break
+					} else if Abs(src.File()-dst.File()) != 1 {
+						break
+					}
+
+					ray.Set(dst.Bitboard())
+
+					src = dst
+				}
+			}
+
+			_DirectionMasks[src][dir] = ray
+		}
 	}
+
 }
 
 func (d Direction) String() string {
@@ -121,4 +154,8 @@ func (dir Direction) ToEdge(src Square) Square {
 
 func (d Direction) IsDiagonal() bool {
 	return d >= _DirectionDiagonalStart
+}
+
+func (dir Direction) Mask(src Square) Bitboard {
+	return _DirectionMasks[src][dir]
 }

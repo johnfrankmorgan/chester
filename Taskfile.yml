@@ -5,6 +5,9 @@ vars:
   TEST_PACKAGE: '{{.TEST_PACKAGE | default "./..."}}'
   TEST_COVERAGE: '{{.TEST_COVERAGE | default "/tmp/chester.cov"}}'
   TEST_VERBOSE: '{{.TEST_VERBOSE | default "false"}}'
+  TEST_CPU_PROFILE: '{{.TEST_CPU_PROFILE | default ""}}'
+  TEST_MEM_PROFILE: '{{.TEST_MEM_PROFILE | default ""}}'
+  TEST_RUN: '{{.TEST_RUN | default ""}}'
 
 tasks:
   run:
@@ -17,7 +20,14 @@ tasks:
 
   test:
     cmds:
-      - go test -coverprofile={{.TEST_COVERAGE}} -short={{.TEST_SHORT}} -v={{.TEST_VERBOSE}} {{.TEST_PACKAGE}}
+      - go test
+          -coverprofile={{.TEST_COVERAGE}}
+          -cpuprofile={{.TEST_CPU_PROFILE}}
+          -memprofile={{.TEST_MEM_PROFILE}}
+          -short={{.TEST_SHORT}}
+          -v={{.TEST_VERBOSE}}
+          -run={{.TEST_RUN}}
+          {{.TEST_PACKAGE}}
 
   test-coverage:
     deps: [test]
