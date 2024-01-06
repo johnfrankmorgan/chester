@@ -121,10 +121,6 @@ func (cmd CommandGenerateMagics) run() Magics {
 					continue
 				}
 
-				if Abs(src.Rank()-dst.Rank()) > 2 {
-					continue
-				}
-
 				moves.Set(dst.Bitboard())
 			}
 

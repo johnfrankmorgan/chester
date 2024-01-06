@@ -110,3 +110,89 @@ func (t *MagicsTest) TestOrthogonal() {
 		})
 	}
 }
+
+func (t *MagicsTest) TestKing() {
+	for _, test := range []struct {
+		src      Square
+		expected Bitboard
+	}{
+		{
+			src: SquareB2,
+			expected: SquareA3.Bitboard() | SquareB3.Bitboard() | SquareC3.Bitboard() |
+				SquareA2.Bitboard() | SquareC2.Bitboard() |
+				SquareA1.Bitboard() | SquareB1.Bitboard() | SquareC1.Bitboard(),
+		},
+		{
+			src: SquareH8,
+			expected: SquareG8.Bitboard() |
+				SquareG7.Bitboard() | SquareH7.Bitboard(),
+		},
+	} {
+		t.Run(test.src.String(), func() {
+			moves := Magic.King(test.src)
+
+			t.Assert().Equal(test.expected, moves)
+		})
+	}
+}
+
+func (t *MagicsTest) TestKnight() {
+	for _, test := range []struct {
+		src      Square
+		expected Bitboard
+	}{
+		{
+			src: SquareG1,
+			expected: SquareH3.Bitboard() |
+				SquareF3.Bitboard() |
+				SquareE2.Bitboard(),
+		},
+		{
+			src: SquareD4,
+			expected: SquareC6.Bitboard() |
+				SquareE6.Bitboard() |
+				SquareF5.Bitboard() |
+				SquareF3.Bitboard() |
+				SquareE2.Bitboard() |
+				SquareC2.Bitboard() |
+				SquareB3.Bitboard() |
+				SquareB5.Bitboard(),
+		},
+	} {
+		t.Run(test.src.String(), func() {
+			moves := Magic.Knight(test.src)
+
+			t.Assert().Equal(test.expected, moves)
+		})
+	}
+}
+
+func (t *MagicsTest) TestPawnAttacks() {
+	for _, test := range []struct {
+		src      Square
+		color    Color
+		expected Bitboard
+	}{
+		{
+			src:      SquareG2,
+			color:    ColorWhite,
+			expected: SquareF3.Bitboard() | SquareH3.Bitboard(),
+		},
+		{
+			src:      SquareH7,
+			color:    ColorBlack,
+			expected: SquareG6.Bitboard(),
+		},
+		{
+			src:      SquareB7,
+			color:    ColorWhite,
+			expected: SquareA8.Bitboard() | SquareC8.Bitboard(),
+		},
+	} {
+		t.Run(test.src.String(), func() {
+			moves := Magic.PawnAttacks(test.color, test.src)
+
+			t.Assert().Equal(test.expected, moves)
+		})
+	}
+}

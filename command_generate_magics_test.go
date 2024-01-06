@@ -18,9 +18,7 @@ type CommandGenerateMagicsTest struct {
 }
 
 func (t *CommandGenerateMagicsTest) TearDownTest() {
-	PanicIfError(
-		Magic.LoadDefault(),
-	)
+	PanicIfError(Magic.LoadDefault())
 }
 
 func (t *CommandGenerateMagicsTest) TestRun() {
@@ -37,6 +35,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 				t.Assert().ErrorIs(err, os.ErrNotExist)
 			},
 		},
+
 		{
 			name: "diagonal generation",
 			cmd: CommandGenerateMagics{
@@ -55,6 +54,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 				t.Assert().Equal(SquareG7.Bitboard(), moves)
 			},
 		},
+
 		{
 			name: "orthogonal generation",
 			skip: testing.Short(),
@@ -74,6 +74,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 				t.Assert().Equal(SquareG8.Bitboard()|SquareH7.Bitboard(), moves)
 			},
 		},
+
 		{
 			name: "king generation",
 			cmd: CommandGenerateMagics{
@@ -100,6 +101,7 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 				t.Assert().Equal(expected, Magic.King(SquareE4))
 			},
 		},
+
 		{
 			name: "knight generation",
 			cmd: CommandGenerateMagics{
@@ -115,6 +117,26 @@ func (t *CommandGenerateMagicsTest) TestRun() {
 				PanicIfError(Magic.Load(magics))
 
 				t.Assert().Equal(SquareA3.Bitboard()|SquareC3.Bitboard()|SquareD2.Bitboard(), Magic.Knight(SquareB1))
+			},
+		},
+
+		{
+			name: "pawn attack generation",
+			cmd: CommandGenerateMagics{
+				Output: "/tmp/chester.pawn.gob",
+				Pawn:   true,
+			},
+			assert: func(t *CommandGenerateMagicsTest, cmd CommandGenerateMagics, err error) {
+				t.Assert().NoError(err)
+
+				magics := Must(os.Open(cmd.Output))
+				defer magics.Close()
+
+				PanicIfError(Magic.Load(magics))
+
+				t.Assert().Equal(SquareD5.Bitboard()|SquareF5.Bitboard(), Magic.PawnAttacks(ColorWhite, SquareE4))
+				t.Assert().Equal(SquareD3.Bitboard()|SquareF3.Bitboard(), Magic.PawnAttacks(ColorBlack, SquareE4))
+				t.Assert().Equal(SquareB3.Bitboard(), Magic.PawnAttacks(ColorWhite, SquareA2))
 			},
 		},
 	} {
