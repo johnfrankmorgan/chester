@@ -7,63 +7,63 @@ import (
 )
 
 type CommandIO struct {
-	_in  io.ReadCloser
-	_out io.WriteCloser
-	_err io.WriteCloser
+	stdin  io.ReadCloser
+	stdout io.WriteCloser
+	stderr io.WriteCloser
 }
 
-func (cmd *CommandIO) _init() {
-	if cmd._in == nil {
+func (cmd *CommandIO) init() {
+	if cmd.stdin == nil {
 		cmd.SetIn(os.Stdin)
 	}
 
-	if cmd._out == nil {
+	if cmd.stdout == nil {
 		cmd.SetOut(os.Stdout)
 	}
 
-	if cmd._err == nil {
+	if cmd.stderr == nil {
 		cmd.SetErr(os.Stderr)
 	}
 }
 
 func (cmd *CommandIO) Close() error {
-	cmd._init()
+	cmd.init()
 
 	err := error(nil)
 
-	err = errors.Join(err, cmd._in.Close())
-	err = errors.Join(err, cmd._out.Close())
-	err = errors.Join(err, cmd._err.Close())
+	err = errors.Join(err, cmd.stdin.Close())
+	err = errors.Join(err, cmd.stdout.Close())
+	err = errors.Join(err, cmd.stderr.Close())
 
 	return err
 }
 
 func (cmd *CommandIO) In() io.Reader {
-	cmd._init()
+	cmd.init()
 
-	return cmd._in
+	return cmd.stdin
 }
 
 func (cmd *CommandIO) SetIn(r io.ReadCloser) {
-	cmd._in = r
+	cmd.stdin = r
 }
 
 func (cmd *CommandIO) Out() io.Writer {
-	cmd._init()
+	cmd.init()
 
-	return cmd._out
+	return cmd.stdout
 }
 
 func (cmd *CommandIO) SetOut(w io.WriteCloser) {
-	cmd._out = w
+	cmd.stdout = w
 }
 
 func (cmd *CommandIO) Err() io.Writer {
-	cmd._init()
+	cmd.init()
 
-	return cmd._err
+	return cmd.stderr
 }
 
 func (cmd *CommandIO) SetErr(w io.WriteCloser) {
-	cmd._err = w
+	cmd.stderr = w
 }

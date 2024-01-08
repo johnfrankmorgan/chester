@@ -9,6 +9,8 @@ import (
 type Bitboard uint64
 
 const (
+	BitboardAll Bitboard = math.MaxUint64
+
 	BitboardFileA Bitboard = 0x101010101010101
 	BitboardFileB          = BitboardFileA << 1
 	BitboardFileC          = BitboardFileB << 1
@@ -26,12 +28,10 @@ const (
 	BitboardRank6          = BitboardRank5 << 8
 	BitboardRank7          = BitboardRank6 << 8
 	BitboardRank8          = BitboardRank7 << 8
-
-	BitboardAll Bitboard = math.MaxUint64
 )
 
 var (
-	BitboardFiles = [FileCount]Bitboard{
+	BitboardFiles = [...]Bitboard{
 		FileA: BitboardFileA,
 		FileB: BitboardFileB,
 		FileC: BitboardFileC,
@@ -42,7 +42,7 @@ var (
 		FileH: BitboardFileH,
 	}
 
-	BitboardRanks = [RankCount]Bitboard{
+	BitboardRanks = [...]Bitboard{
 		Rank1: BitboardRank1,
 		Rank2: BitboardRank2,
 		Rank3: BitboardRank3,
@@ -51,40 +51,6 @@ var (
 		Rank6: BitboardRank6,
 		Rank7: BitboardRank7,
 		Rank8: BitboardRank8,
-	}
-
-	BitboardsCastle = ColorTable[struct {
-		Kingside struct {
-			Attackers, Blockers Bitboard
-		}
-
-		Queenside struct {
-			Attackers, Blockers Bitboard
-		}
-	}]{
-		ColorWhite: {
-			Kingside: struct{ Attackers, Blockers Bitboard }{
-				Attackers: SquareF1.Bitboard() | SquareG1.Bitboard(),
-				Blockers:  SquareF1.Bitboard() | SquareG1.Bitboard(),
-			},
-
-			Queenside: struct{ Attackers, Blockers Bitboard }{
-				Attackers: SquareC1.Bitboard() | SquareD1.Bitboard(),
-				Blockers:  SquareB1.Bitboard() | SquareC1.Bitboard() | SquareD1.Bitboard(),
-			},
-		},
-
-		ColorBlack: {
-			Kingside: struct{ Attackers, Blockers Bitboard }{
-				Attackers: SquareF8.Bitboard() | SquareG8.Bitboard(),
-				Blockers:  SquareF8.Bitboard() | SquareG8.Bitboard(),
-			},
-
-			Queenside: struct{ Attackers, Blockers Bitboard }{
-				Attackers: SquareC8.Bitboard() | SquareD8.Bitboard(),
-				Blockers:  SquareB8.Bitboard() | SquareC8.Bitboard() | SquareD8.Bitboard(),
-			},
-		},
 	}
 )
 

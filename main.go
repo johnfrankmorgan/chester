@@ -1,53 +1,53 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
-	"runtime/pprof"
 
 	"github.com/alecthomas/kong"
 )
 
 func main() {
-	cli := struct {
-		Debug   bool   `help:"Enable debug logging."`
-		Profile string `help:"Write profile information here."`
+	var cli struct {
+		Log struct {
+			Level  slog.Level `help:"Logging level." default:"info"`
+			Source bool       `help:"Add source to logs." default:"false"`
+			File   string     `help:"Write logs to the specified file." type:"path"`
+		} `embed:"" prefix:"log-"`
 
-		Divide           CommandDivide           `cmd:""`
-		UCI              CommandUCI              `cmd:"" default:"true"`
-		GenerateOpenings CommandGenerateOpenings `cmd:""`
-	}{}
+		GenerateMagics CommandGenerateMagics `cmd:"" help:"Generate magic bitboards."`
+		Perft          CommandPerft          `cmd:"" help:"Run Perft."`
+		UCI            CommandUCI            `cmd:"" help:"Run UCI."`
+	}
 
 	ctx := kong.Parse(&cli)
 
-	if cli.Debug {
+	{
+		log := os.Stderr
+
+		if cli.Log.File != "" {
+			err := error(nil)
+
+			f, err := os.OpenFile(cli.Log.File, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+			ctx.FatalIfErrorf(err)
+
+			defer f.Close()
+
+			log = f
+		}
+
 		slog.SetDefault(
 			slog.New(
-				slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-					AddSource: true,
-					Level:     slog.LevelDebug,
+				slog.NewTextHandler(log, &slog.HandlerOptions{
+					AddSource: cli.Log.Source,
+					Level:     cli.Log.Level,
 				}),
 			),
 		)
 	}
 
-	profile := (*os.File)(nil)
-
-	if cli.Profile != "" {
-		err := error(nil)
-
-		profile, err = os.Create(cli.Profile)
-
-		ctx.FatalIfErrorf(err)
-		ctx.FatalIfErrorf(pprof.StartCPUProfile(profile))
+	if err := ctx.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s: error: %s\n", os.Args[0], err)
 	}
-
-	err := ctx.Run()
-
-	if profile != nil {
-		pprof.StopCPUProfile()
-		ctx.FatalIfErrorf(profile.Close())
-	}
-
-	ctx.FatalIfErrorf(err)
 }

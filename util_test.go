@@ -5,87 +5,73 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestUtil(t *testing.T) {
+func TestUnknownNumeric(t *testing.T) {
 	t.Parallel()
 
-	suite.Run(t, &UtilTest{})
+	assert.Equal(t, "int(-100)", UnknownNumeric(-100))
 }
 
-type UtilTest struct {
-	suite.Suite
-}
+func TestTernary(t *testing.T) {
+	t.Parallel()
 
-func (t *UtilTest) TestCheck() {
-	t.Assert().NotPanics(func() {
-		check(nil)
-	})
-
-	t.Assert().PanicsWithValue(io.EOF, func() {
-		check(io.EOF)
-	})
-}
-
-func (t *UtilTest) TestMust() {
-	t.Assert().Equal(1, must(1, nil))
-
-	t.Assert().PanicsWithValue(io.EOF, func() {
-		must(1, io.EOF)
-	})
-}
-
-func (t *UtilTest) TestIstr() {
-	t.Assert().Equal("int(100)", istr(100))
-}
-
-func (t *UtilTest) TestAbs() {
-	for _, test := range []struct {
-		value    int
-		expected int
-	}{
-		{100, 100},
-		{0, 0},
-		{-100, 100},
-		{-80, 80},
-		{123, 123},
-	} {
-		t.Run(strconv.Itoa(test.value), func() {
-			t.Assert().Equal(test.expected, iabs(test.value))
-		})
-	}
-}
-
-func (t *UtilTest) TestSign() {
-	for _, test := range []struct {
-		value    int
-		expected int
-	}{
-		{100, 1},
-		{0, 0},
-		{-100, -1},
-		{-80, -1},
-		{123, 1},
-	} {
-		t.Run(strconv.Itoa(test.value), func() {
-			t.Assert().Equal(test.expected, isign(test.value))
-		})
-	}
-}
-
-func (t *UtilTest) TestTernary() {
 	for _, test := range []struct {
 		condition bool
 		tvalue    int
 		fvalue    int
 		expected  int
 	}{
-		{true, 1, 100, 1},
-		{false, 1, 100, 100},
+		{true, 1, 0, 1},
+		{false, 1, 0, 0},
 	} {
-		t.Run(strconv.FormatBool(test.condition), func() {
-			t.Assert().Equal(test.expected, ternary(test.condition, test.tvalue, test.fvalue))
+		test := test
+
+		t.Run(strconv.FormatBool(test.condition), func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, test.expected, Ternary(test.condition, test.tvalue, test.fvalue))
+		})
+	}
+}
+
+func TestPanicIfError(t *testing.T) {
+	t.Parallel()
+
+	assert.NotPanics(t, func() {
+		PanicIfError(nil)
+	})
+
+	assert.PanicsWithValue(t, io.EOF, func() {
+		PanicIfError(io.EOF)
+	})
+}
+
+func TestMust(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, 100, Must(100, nil))
+
+	assert.PanicsWithValue(t, io.EOF, func() {
+		Must(100, io.EOF)
+	})
+}
+
+func TestAbs(t *testing.T) {
+	for _, test := range []struct {
+		value    int
+		expected int
+	}{
+		{100, 100},
+		{-100, 100},
+	} {
+		test := test
+
+		t.Run(strconv.Itoa(test.value), func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, test.expected, Abs(test.value))
 		})
 	}
 }

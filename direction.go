@@ -1,7 +1,5 @@
 package main
 
-import "log/slog"
-
 type Direction uint8
 
 const (
@@ -20,30 +18,6 @@ const (
 )
 
 var (
-	_DirectionNames = [DirectionCount]string{
-		DirectionNorth:     "north",
-		DirectionSouth:     "south",
-		DirectionEast:      "east",
-		DirectionWest:      "west",
-		DirectionNorthEast: "north east",
-		DirectionSouthWest: "south west",
-		DirectionNorthWest: "north west",
-		DirectionSouthEast: "south east",
-	}
-
-	_DirectionOffsets = [DirectionCount]Square{
-		DirectionNorth:     FileCount,
-		DirectionSouth:     -FileCount,
-		DirectionEast:      1,
-		DirectionWest:      -1,
-		DirectionNorthEast: FileCount + 1,
-		DirectionSouthWest: -FileCount - 1,
-		DirectionNorthWest: FileCount - 1,
-		DirectionSouthEast: -FileCount + 1,
-	}
-
-	_DirectionToEdge [SquareCount][DirectionCount]Square
-
 	Directions = [DirectionCount]Direction{
 		DirectionNorth,
 		DirectionSouth,
@@ -68,14 +42,35 @@ var (
 		DirectionNorthWest,
 		DirectionSouthEast,
 	}
+
+	_DirectionStrings = [DirectionCount]string{
+		DirectionNorth:     "north",
+		DirectionSouth:     "south",
+		DirectionEast:      "east",
+		DirectionWest:      "west",
+		DirectionNorthEast: "north east",
+		DirectionSouthWest: "south west",
+		DirectionNorthWest: "north west",
+		DirectionSouthEast: "south east",
+	}
+
+	_DirectionOffsets = [DirectionCount]Square{
+		DirectionNorth:     FileCount,
+		DirectionSouth:     -FileCount,
+		DirectionEast:      1,
+		DirectionWest:      -1,
+		DirectionNorthEast: FileCount + 1,
+		DirectionSouthWest: -FileCount - 1,
+		DirectionNorthWest: FileCount - 1,
+		DirectionSouthEast: -FileCount + 1,
+	}
+
+	_DirectionToEdge [SquareCount][DirectionCount]Square
+	_DirectionMasks  [SquareCount][DirectionCount]Bitboard
 )
 
 func init() {
-	slog.Debug("initializing squares to edge")
-
-	for src := 0; src < SquareCount; src++ {
-		src := Square(src)
-
+	for src := SquareFirst; src <= SquareLast; src++ {
 		file := Square(src.File())
 		rank := Square(src.Rank())
 
@@ -94,37 +89,73 @@ func init() {
 			DirectionNorthWest: min(north, west),
 			DirectionSouthWest: min(south, west),
 		}
+
+		_DirectionMasks[src] = [DirectionCount]Bitboard{
+			DirectionNorth: BitboardFiles[src.File()],
+			DirectionSouth: BitboardFiles[src.File()],
+			DirectionEast:  BitboardRanks[src.Rank()],
+			DirectionWest:  BitboardRanks[src.Rank()],
+		}
+
+		for _, dir := range DirectionsDiagonal {
+			ray := src.Bitboard()
+
+			for _, off := range [...]Square{dir.Offset(), dir.Opposite().Offset()} {
+				src := src
+
+				for {
+					dst := src + off
+
+					if !dst.Valid() {
+						break
+					} else if Abs(src.File()-dst.File()) != 1 {
+						break
+					}
+
+					ray.Set(dst.Bitboard())
+
+					src = dst
+				}
+			}
+
+			_DirectionMasks[src][dir] = ray
+		}
 	}
+
 }
 
-func (dir Direction) String() string {
-	return _DirectionNames[dir]
-}
-
-func (dir Direction) Offset() Square {
-	return _DirectionOffsets[dir]
-}
-
-func (dir Direction) Opposite() Direction {
-	if dir.Offset() < 0 {
-		return dir - 1
+func (d Direction) String() string {
+	if d.Valid() {
+		return _DirectionStrings[d]
 	}
 
-	return dir + 1
+	return UnknownNumeric(d)
+}
+
+func (d Direction) Valid() bool {
+	return d < DirectionCount
+}
+
+func (d Direction) Offset() Square {
+	return _DirectionOffsets[d]
+}
+
+func (d Direction) Opposite() Direction {
+	if d.Offset() < 0 {
+		return d - 1
+	}
+
+	return d + 1
 }
 
 func (dir Direction) ToEdge(src Square) Square {
 	return _DirectionToEdge[src][dir]
 }
 
+func (d Direction) IsDiagonal() bool {
+	return d >= _DirectionDiagonalStart
+}
+
 func (dir Direction) Mask(src Square) Bitboard {
-	return Precomputed.Masks.Direction[src][dir]
-}
-
-func (dir Direction) IsOrthogonal() bool {
-	return dir < _DirectionDiagonalStart
-}
-
-func (dir Direction) IsDiagonal() bool {
-	return dir >= _DirectionDiagonalStart
+	return _DirectionMasks[src][dir]
 }

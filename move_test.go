@@ -1,8 +1,13 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -16,118 +21,6 @@ type MoveTest struct {
 	suite.Suite
 }
 
-func (t *MoveTest) TestNewUCIMove() {
-	for _, test := range []struct {
-		board    Board
-		move     string
-		err      string
-		expected Move
-	}{
-		{
-			board:    must(NewBoard(BoardStartPositionFEN)),
-			move:     "a2a4",
-			expected: NewMove(SquareA2, SquareA4, MoveFlagsDoublePawnPush),
-		},
-		{
-			board:    must(NewBoard(BoardStartPositionFEN)),
-			move:     "a2a3q",
-			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToQueen),
-		},
-		{
-			board:    must(NewBoard(BoardStartPositionFEN)),
-			move:     "a2a3r",
-			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToRook),
-		},
-		{
-			board:    must(NewBoard(BoardStartPositionFEN)),
-			move:     "a2a3b",
-			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToBishop),
-		},
-		{
-			board:    must(NewBoard(BoardStartPositionFEN)),
-			move:     "a2a3n",
-			expected: NewMove(SquareA2, SquareA3, MoveFlagsPromoteToKnight),
-		},
-		{
-			board: SetupTestBoard([SquareCount]Piece{
-				SquareE8: PieceBlackKing,
-			}, nil),
-			move:     "e8g8",
-			expected: NewMove(SquareE8, SquareG8, MoveFlagsCastleKingside),
-		},
-		{
-			board: SetupTestBoard([SquareCount]Piece{
-				SquareE1: PieceWhiteKing,
-			}, nil),
-			move:     "e1c1",
-			expected: NewMove(SquareE1, SquareC1, MoveFlagsCastleQueenside),
-		},
-		{
-			board: SetupTestBoard([SquareCount]Piece{
-				SquareE1: PieceWhiteRook,
-				SquareA1: PieceBlackPawn,
-			}, nil),
-			move:     "e1a1",
-			expected: NewMove(SquareE1, SquareA1, MoveFlagsCapture),
-		},
-		{
-			board: SetupTestBoard([SquareCount]Piece{
-				SquareE5: PieceWhitePawn,
-			}, nil),
-			move:     "e5d6",
-			expected: NewMove(SquareE5, SquareD6, MoveFlagsCapture, MoveFlagsCaptureEnPassant),
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "a",
-			err:   "invalid move: a",
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "a2sdfssl",
-			err:   "invalid move: a2sdfssl",
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "s1d2",
-			err:   "invalid source file: s",
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "asd2",
-			err:   "invalid source rank: s",
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "a122",
-			err:   "invalid destination file: 2",
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "a1d9",
-			err:   "invalid destination rank: 9",
-		},
-		{
-			board: must(NewBoard(BoardStartPositionFEN)),
-			move:  "a1d8k",
-			err:   "invalid promotion: k",
-		},
-	} {
-		t.Run(test.move, func() {
-			move, err := NewUCIMove(&test.board, test.move)
-
-			if test.err != "" {
-				t.Assert().ErrorIs(err, ErrUCI)
-				t.Assert().ErrorContains(err, test.err)
-			} else {
-				t.Assert().NoError(err)
-			}
-
-			t.Assert().Equal(test.expected, move)
-		})
-	}
-}
-
 func (t *MoveTest) TestString() {
 	for _, test := range []struct {
 		move     Move
@@ -135,28 +28,10 @@ func (t *MoveTest) TestString() {
 	}{
 		{NewMove(SquareA1, SquareD1), "a1d1"},
 		{NewMove(SquareE2, SquareE4), "e2e4"},
-		{NewMove(SquareE4, SquareD5, MoveFlagsCapture), "e4d5 (c)"},
+		{NewMove(SquareE4, SquareD5), "e4d5"},
 	} {
 		t.Run(test.expected, func() {
 			t.Assert().Equal(test.expected, test.move.String())
-		})
-	}
-}
-
-func (t *MoveTest) TestUCI() {
-	for _, test := range []struct {
-		move     Move
-		expected string
-	}{
-		{NewMove(SquareA1, SquareD1), "a1d1"},
-		{NewMove(SquareE2, SquareE4), "e2e4"},
-		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToQueen), "e4d5q"},
-		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToRook), "e4d5r"},
-		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToBishop), "e4d5b"},
-		{NewMove(SquareE4, SquareD5, MoveFlagsPromoteToKnight), "e4d5n"},
-	} {
-		t.Run(test.expected, func() {
-			t.Assert().Equal(test.expected, test.move.UCI())
 		})
 	}
 }
@@ -166,11 +41,11 @@ func (t *MoveTest) TestPromotion() {
 		move     Move
 		expected PieceKind
 	}{
-		{NewMove(SquareA3, SquareA4), PieceNone},
-		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToQueen), PieceQueen},
-		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToRook), PieceRook},
-		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToBishop), PieceBishop},
-		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToKnight), PieceKnight},
+		{NewMove(SquareA3, SquareA4), PieceKindNone},
+		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToQueen), PieceKindQueen},
+		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToRook), PieceKindRook},
+		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToBishop), PieceKindBishop},
+		{NewMove(SquareA3, SquareA4, MoveFlagsPromoteToKnight), PieceKindKnight},
 	} {
 		t.Run(test.move.String(), func() {
 			t.Assert().Equal(test.expected, test.move.Promotion())
@@ -178,16 +53,98 @@ func (t *MoveTest) TestPromotion() {
 	}
 }
 
-func (t *MoveTest) TestIsZero() {
+func (t *MoveTest) TestValid() {
 	for _, test := range []struct {
 		move     Move
 		expected bool
 	}{
-		{Move{}, true},
-		{NewMove(SquareA1, SquareA2), false},
+		{Move{}, false},
+		{NewMove(SquareA1, SquareA2), true},
 	} {
 		t.Run(test.move.String(), func() {
-			t.Assert().Equal(test.expected, test.move.IsZero())
+			t.Assert().Equal(test.expected, test.move.Valid())
+		})
+	}
+}
+
+func TestMoveFlags(t *testing.T) {
+	t.Parallel()
+
+	suite.Run(t, &MoveFlagsTest{})
+}
+
+type MoveFlagsTest struct {
+	suite.Suite
+}
+
+func (t *MoveFlagsTest) TestString() {
+	for _, test := range []struct {
+		mf       MoveFlags
+		expected string
+	}{
+		{MoveFlagsEnPassant, "e"},
+		{MoveFlagsDoublePawnPush, "2"},
+		{MoveFlagsCastleKingside, "K"},
+		{MoveFlagsCastleQueenside, "Q"},
+		{MoveFlagsPromoteToQueen, "q"},
+		{MoveFlagsPromoteToRook, "r"},
+		{MoveFlagsPromoteToBishop, "b"},
+		{MoveFlagsPromoteToKnight, "n"},
+		{MoveFlagsCastle, "KQ"},
+		{MoveFlagsPromote, "qrbn"},
+	} {
+		t.Run(test.expected, func() {
+			t.Assert().Equal(test.expected, test.mf.String())
+		})
+	}
+}
+
+func (t *MoveFlagsTest) TestIsSet() {
+	mf := MoveFlagsEnPassant | MoveFlagsPromoteToQueen
+
+	t.Assert().True(mf.IsSet(MoveFlagsEnPassant))
+	t.Assert().True(mf.IsSet(MoveFlagsPromoteToQueen))
+	t.Assert().True(mf.IsSet(MoveFlagsEnPassant | MoveFlagsPromoteToQueen))
+	t.Assert().False(mf.IsSet(MoveFlagsDoublePawnPush))
+	t.Assert().False(mf.IsSet(MoveFlagsEnPassant | MoveFlagsDoublePawnPush))
+}
+
+func (t *MoveFlagsTest) TestAnySet() {
+	mf := MoveFlagsCastleKingside
+
+	t.Assert().True(mf.AnySet(MoveFlagsCastle))
+}
+
+func TestMoveGenerator(t *testing.T) {
+	tests := []struct {
+		FEN   string
+		Depth int
+		Nodes int
+		Skip  bool
+	}(nil)
+
+	PanicIfError(
+		json.Unmarshal(Must(os.ReadFile("testdata/perft.json")), &tests),
+	)
+
+	maxdepth := Ternary(testing.Short(), 3, 5)
+
+	for _, test := range tests {
+		test := test
+
+		if test.Skip || test.Depth > maxdepth {
+			continue
+		}
+
+		t.Run(fmt.Sprintf("%d %s", test.Depth, test.FEN), func(t *testing.T) {
+			t.Parallel()
+
+			game := Must(NewGame(test.FEN))
+
+			cmd := CommandPerft{}
+			cmd.SetOut(wcloser{io.Discard, nil})
+
+			assert.Equal(t, test.Nodes, cmd.perft(game, test.Depth))
 		})
 	}
 }

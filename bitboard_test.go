@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,11 +20,15 @@ type BitboardTest struct {
 }
 
 func (t *BitboardTest) TestString() {
+	rank := func(rank Rank) Bitboard {
+		return 0b11111111 << Bitboard(rank*8)
+	}
+
 	for i, test := range []struct {
 		bitboard Bitboard
 		expected []string
 	}{
-		{BitboardRank1 | BitboardRank2 | BitboardRank6 | BitboardRank8, []string{
+		{rank(Rank8) | rank(Rank6) | rank(Rank2) | rank(Rank1), []string{
 			"8 X X X X X X X X",
 			"7 . . . . . . . .",
 			"6 X X X X X X X X",
@@ -89,6 +94,21 @@ func (t *BitboardTest) TestSet() {
 	b.Set(0b010)
 
 	t.Assert().EqualValues(0b1111, b)
+}
+
+func (t *BitboardTest) TestSetCount() {
+	for _, test := range []struct {
+		bitboard Bitboard
+		expected int
+	}{
+		{0b111, 3},
+		{0b100100000001, 3},
+		{0, 0},
+		{1, 1},
+		{math.MaxUint64, 64},
+	} {
+		t.Assert().Equal(test.expected, test.bitboard.SetCount())
+	}
 }
 
 func (t *BitboardTest) TestClear() {

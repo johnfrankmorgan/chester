@@ -74,8 +74,63 @@ const (
 	SquareCount = FileCount * RankCount
 )
 
+var (
+	_SquareAlignMasks [SquareCount][SquareCount]Bitboard
+)
+
+type File int8
+
+const (
+	FileA File = iota
+	FileB
+	FileC
+	FileD
+	FileE
+	FileF
+	FileG
+	FileH
+
+	FileFirst = FileA
+	FileLast  = FileH
+
+	FileCount = 8
+)
+
+type Rank int8
+
+const (
+	Rank1 Rank = iota
+	Rank2
+	Rank3
+	Rank4
+	Rank5
+	Rank6
+	Rank7
+	Rank8
+
+	RankFirst = Rank1
+	RankLast  = Rank8
+
+	RankCount = 8
+)
+
+func init() {
+	for src := SquareFirst; src <= SquareLast; src++ {
+		for _, dir := range Directions {
+			mask := dir.Mask(src)
+			alignment := mask
+
+			for mask > 0 {
+				dst := Square(mask.PopLSB())
+
+				_SquareAlignMasks[src][dst] = alignment
+			}
+		}
+	}
+}
+
 func NewSquare(file File, rank Rank) Square {
-	return Square(rank)*FileCount + Square(file)
+	return Square(rank*FileCount) + Square(file)
 }
 
 func (s Square) String() string {
@@ -83,7 +138,7 @@ func (s Square) String() string {
 		return s.File().String() + s.Rank().String()
 	}
 
-	return istr(s)
+	return UnknownNumeric(s)
 }
 
 func (s Square) Valid() bool {
@@ -91,17 +146,41 @@ func (s Square) Valid() bool {
 }
 
 func (s Square) File() File {
-	return File(s % FileCount)
+	return File(s & 0b111)
 }
 
 func (s Square) Rank() Rank {
-	return Rank(s / FileCount)
-}
-
-func (s Square) Coord() (File, Rank) {
-	return s.File(), s.Rank()
+	return Rank(s >> 3)
 }
 
 func (s Square) Bitboard() Bitboard {
 	return 1 << Bitboard(s)
+}
+
+func (s Square) AlignMask(other Square) Bitboard {
+	return _SquareAlignMasks[s][other]
+}
+
+func (f File) String() string {
+	if f.Valid() {
+		return string(byte(f) + 'a')
+	}
+
+	return UnknownNumeric(f)
+}
+
+func (f File) Valid() bool {
+	return f >= FileFirst && f <= FileLast
+}
+
+func (r Rank) String() string {
+	if r.Valid() {
+		return string(byte(r) + '1')
+	}
+
+	return UnknownNumeric(r)
+}
+
+func (r Rank) Valid() bool {
+	return r >= RankFirst && r <= RankLast
 }

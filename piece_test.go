@@ -23,8 +23,8 @@ func (t *PieceTest) TestString() {
 	}{
 		{PieceBlackPawn, "p"},
 		{PieceWhitePawn, "P"},
-		{NewPiece(ColorBlack, PieceQueen), "q"},
-		{NewPiece(ColorWhite, PieceKing), "K"},
+		{NewPiece(ColorBlack, PieceKindQueen), "q"},
+		{NewPiece(ColorWhite, PieceKindKing), "K"},
 	} {
 		t.Run(test.expected, func() {
 			t.Assert().Equal(test.expected, test.piece.String())
@@ -39,8 +39,8 @@ func (t *PieceTest) TestColor() {
 	}{
 		{PieceBlackPawn, ColorBlack},
 		{PieceWhitePawn, ColorWhite},
-		{NewPiece(ColorBlack, PieceQueen), ColorBlack},
-		{NewPiece(ColorWhite, PieceKing), ColorWhite},
+		{NewPiece(ColorBlack, PieceKindQueen), ColorBlack},
+		{NewPiece(ColorWhite, PieceKindKing), ColorWhite},
 	} {
 		t.Run(test.piece.String(), func() {
 			t.Assert().Equal(test.expected, test.piece.Color())
@@ -53,10 +53,10 @@ func (t *PieceTest) TestKind() {
 		piece    Piece
 		expected PieceKind
 	}{
-		{PieceBlackPawn, PiecePawn},
-		{PieceWhitePawn, PiecePawn},
-		{NewPiece(ColorBlack, PieceQueen), PieceQueen},
-		{NewPiece(ColorWhite, PieceKing), PieceKing},
+		{PieceBlackPawn, PieceKindPawn},
+		{PieceWhitePawn, PieceKindPawn},
+		{NewPiece(ColorBlack, PieceKindQueen), PieceKindQueen},
+		{NewPiece(ColorWhite, PieceKindKing), PieceKindKing},
 	} {
 		t.Run(test.piece.String(), func() {
 			t.Assert().Equal(test.expected, test.piece.Kind())
@@ -70,15 +70,98 @@ func (t *PieceTest) TestIs() {
 		kind     PieceKind
 		expected bool
 	}{
-		{PieceBlackPawn, PiecePawn, true},
-		{PieceWhitePawn, PiecePawn, true},
-		{NewPiece(ColorBlack, PieceQueen), PieceQueen, true},
-		{NewPiece(ColorWhite, PieceKing), PieceKing, true},
-		{NewPiece(ColorWhite, PieceKing), PieceQueen, false},
-		{PieceBlackKnight, PieceBishop, false},
+		{PieceBlackPawn, PieceKindPawn, true},
+		{PieceWhitePawn, PieceKindPawn, true},
+		{NewPiece(ColorBlack, PieceKindQueen), PieceKindQueen, true},
+		{NewPiece(ColorWhite, PieceKindKing), PieceKindKing, true},
+		{NewPiece(ColorWhite, PieceKindKing), PieceKindQueen, false},
+		{PieceBlackKnight, PieceKindBishop, false},
 	} {
 		t.Run(test.piece.String(), func() {
 			t.Assert().Equal(test.expected, test.piece.Is(test.kind))
+		})
+	}
+}
+
+func TestPieceKind(t *testing.T) {
+	t.Parallel()
+
+	suite.Run(t, &PieceKindTest{})
+}
+
+type PieceKindTest struct {
+	suite.Suite
+}
+
+func (t *PieceKindTest) TestString() {
+	for _, test := range []struct {
+		kind     PieceKind
+		expected string
+	}{
+		{PieceKindPawn, "p"},
+		{PieceKindKnight, "n"},
+		{PieceKindBishop, "b"},
+		{PieceKindRook, "r"},
+		{PieceKindQueen, "q"},
+		{PieceKindKing, "k"},
+		{10, "main.PieceKind(10)"},
+	} {
+		t.Run(test.expected, func() {
+			t.Assert().Equal(test.expected, test.kind.String())
+		})
+	}
+}
+
+func TestColor(t *testing.T) {
+	t.Parallel()
+
+	suite.Run(t, &ColorTest{})
+}
+
+type ColorTest struct {
+	suite.Suite
+}
+
+func (t *ColorTest) TestString() {
+	for _, test := range []struct {
+		color    Color
+		expected string
+	}{
+		{ColorWhite, "w"},
+		{ColorBlack, "b"},
+		{10, "main.Color(10)"},
+	} {
+		t.Run(test.expected, func() {
+			t.Assert().Equal(test.expected, test.color.String())
+		})
+	}
+}
+
+func (t *ColorTest) TestValid() {
+	for _, test := range []struct {
+		color    Color
+		expected bool
+	}{
+		{ColorWhite, true},
+		{ColorBlack, true},
+		{10, false},
+	} {
+		t.Run(test.color.String(), func() {
+			t.Assert().Equal(test.expected, test.color.Valid())
+		})
+	}
+}
+
+func (t *ColorTest) TestOpponent() {
+	for _, test := range []struct {
+		color    Color
+		expected Color
+	}{
+		{ColorWhite, ColorBlack},
+		{ColorBlack, ColorWhite},
+	} {
+		t.Run(test.color.String(), func() {
+			t.Assert().Equal(test.expected, test.color.Opponent())
 		})
 	}
 }

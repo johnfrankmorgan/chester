@@ -33,23 +33,23 @@ func (t *GameTest) TestNewGame() {
 }
 
 func (t *GameTest) TestBoard() {
-	board := must(NewBoard(BoardStartPositionFEN))
+	board := Must(NewBoard(BoardStartPositionFEN))
 
-	game := &Game{_boards: []Board{board}}
+	game := &Game{boards: []Board{board}}
 
 	t.Assert().Equal(board, *game.Board())
 }
 
 func (t *GameTest) TestMakeMove() {
-	game := must(NewGame(BoardStartPositionFEN))
+	game := Must(NewGame(BoardStartPositionFEN))
 
 	game.MakeMove(NewMove(SquareE2, SquareE4, MoveFlagsDoublePawnPush))
 
-	t.Assert().Equal(2, len(game._boards))
+	t.Assert().Equal(2, len(game.boards))
 }
 
 func (t *GameTest) TestUnmakeMove() {
-	game := must(NewGame(BoardStartPositionFEN))
+	game := Must(NewGame(BoardStartPositionFEN))
 
 	board := *game.Board()
 
@@ -61,6 +61,6 @@ func (t *GameTest) TestUnmakeMove() {
 	game.UnmakeMove()
 	game.UnmakeMove()
 
-	t.Assert().Equal(1, len(game._boards))
+	t.Assert().Equal(1, len(game.boards))
 	t.Assert().Equal(board, *game.Board())
 }

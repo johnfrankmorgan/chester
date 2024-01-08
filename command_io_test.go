@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"os"
 	"testing"
@@ -20,18 +21,39 @@ type CommandIOTest struct {
 
 type rcloser struct {
 	io.Reader
+
+	err error
 }
 
-func (rcloser) Close() error {
-	return nil
+func (r rcloser) Close() error {
+	return r.err
 }
 
 type wcloser struct {
 	io.Writer
+
+	err error
 }
 
-func (wcloser) Close() error {
-	return nil
+func (w wcloser) Close() error {
+	return w.err
+}
+
+func (t *CommandIOTest) TestClose() {
+	err1 := errors.New("1")
+	err2 := errors.New("2")
+	err3 := errors.New("3")
+
+	cmd := CommandIO{}
+	cmd.SetIn(rcloser{nil, err1})
+	cmd.SetOut(wcloser{nil, err2})
+	cmd.SetErr(wcloser{nil, err3})
+
+	err := cmd.Close()
+
+	t.Assert().ErrorIs(err, err1)
+	t.Assert().ErrorIs(err, err2)
+	t.Assert().ErrorIs(err, err3)
 }
 
 func (t *CommandIOTest) TestIn() {

@@ -1,15 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
-type CommandDivide struct {
+type CommandPerft struct {
 	CommandIO
 
 	FEN   string `arg:"" help:"FEN position"`
 	Depth int    `default:"1" help:"Depth to search."`
 }
 
-func (cmd CommandDivide) Run() error {
+func (cmd CommandPerft) Run() error {
 	game, err := NewGame(cmd.FEN)
 	if err != nil {
 		return err
@@ -17,14 +20,15 @@ func (cmd CommandDivide) Run() error {
 
 	fmt.Fprintf(cmd.Out(), "FEN: %s\n\n", game.Board().FEN())
 
-	nodes := cmd.divide(game, cmd.Depth)
+	start := time.Now()
+	nodes := cmd.perft(game, cmd.Depth)
 
-	fmt.Fprintf(cmd.Out(), "\nNodes: %d\n", nodes)
+	fmt.Fprintf(cmd.Out(), "\nFound %d nodes in %s\n", nodes, time.Since(start))
 
 	return nil
 }
 
-func (cmd CommandDivide) divide(game *Game, depth int) int {
+func (cmd CommandPerft) perft(game *Game, depth int) int {
 	if depth == 0 {
 		return 1
 	}
@@ -33,11 +37,11 @@ func (cmd CommandDivide) divide(game *Game, depth int) int {
 
 	for _, move := range game.Board().GenerateMoves(MoveGeneratorOptions{}) {
 		game.MakeMove(move)
-		n := cmd.divide(game, depth-1)
+		n := cmd.perft(game, depth-1)
 		nodes += n
 
 		if depth == cmd.Depth {
-			fmt.Fprintf(cmd.Out(), "%s: %d\n", move.UCI(), n)
+			fmt.Fprintf(cmd.Out(), "%s: %d\n", move, n)
 		}
 
 		game.UnmakeMove()

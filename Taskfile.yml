@@ -1,5 +1,14 @@
 version: '3'
 
+vars:
+  TEST_SHORT: '{{.TEST_SHORT | default "true"}}'
+  TEST_PACKAGE: '{{.TEST_PACKAGE | default "./..."}}'
+  TEST_COVERAGE: '{{.TEST_COVERAGE | default "/tmp/chester.cov"}}'
+  TEST_VERBOSE: '{{.TEST_VERBOSE | default "false"}}'
+  TEST_CPU_PROFILE: '{{.TEST_CPU_PROFILE | default ""}}'
+  TEST_MEM_PROFILE: '{{.TEST_MEM_PROFILE | default ""}}'
+  TEST_RUN: '{{.TEST_RUN | default ""}}'
+
 tasks:
   run:
     cmds:
@@ -11,14 +20,21 @@ tasks:
 
   test:
     cmds:
-      - go test {{.CLI_ARGS}} -coverprofile=/tmp/chester.cov
+      - go test
+          -coverprofile={{.TEST_COVERAGE}}
+          -cpuprofile={{.TEST_CPU_PROFILE}}
+          -memprofile={{.TEST_MEM_PROFILE}}
+          -short={{.TEST_SHORT}}
+          -v={{.TEST_VERBOSE}}
+          -run={{.TEST_RUN}}
+          {{.TEST_PACKAGE}}
 
   test-coverage:
     deps: [test]
     cmds:
-      - go tool cover -func=/tmp/chester.cov
+      - go tool cover -func={{.TEST_COVERAGE}}
 
   test-coverage-html:
     deps: [test]
     cmds:
-      - go tool cover -html=/tmp/chester.cov
+      - go tool cover -html={{.TEST_COVERAGE}}

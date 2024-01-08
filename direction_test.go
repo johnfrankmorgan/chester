@@ -30,6 +30,7 @@ func (t *DirectionTest) TestString() {
 		{DirectionSouthWest, "south west"},
 		{DirectionNorthWest, "north west"},
 		{DirectionSouthEast, "south east"},
+		{100, "main.Direction(100)"},
 	} {
 		t.Run(test.expected, func() {
 			t.Assert().Equal(test.expected, test.dir.String())
@@ -98,6 +99,26 @@ func (t *DirectionTest) TestToEdge() {
 	}
 }
 
+func (t *DirectionTest) TestIsDiagonal() {
+	for _, test := range []struct {
+		dir      Direction
+		expected bool
+	}{
+		{DirectionNorth, false},
+		{DirectionSouth, false},
+		{DirectionEast, false},
+		{DirectionWest, false},
+		{DirectionNorthEast, true},
+		{DirectionSouthWest, true},
+		{DirectionNorthWest, true},
+		{DirectionSouthEast, true},
+	} {
+		t.Run(test.dir.String(), func() {
+			t.Assert().Equal(test.expected, test.dir.IsDiagonal())
+		})
+	}
+}
+
 func (t *DirectionTest) TestMask() {
 	for _, test := range []struct {
 		dir      Direction
@@ -154,48 +175,6 @@ func (t *DirectionTest) TestMask() {
 	} {
 		t.Run(fmt.Sprintf("%s(%s)", test.src, test.dir), func() {
 			t.Assert().Equal(test.expected, test.dir.Mask(test.src))
-		})
-	}
-}
-
-func (t *DirectionTest) TestIsOrthogonal() {
-	for _, test := range []struct {
-		dir      Direction
-		expected bool
-	}{
-		{DirectionNorth, true},
-		{DirectionSouth, true},
-		{DirectionEast, true},
-		{DirectionWest, true},
-		{DirectionNorthEast, false},
-		{DirectionSouthWest, false},
-		{DirectionNorthWest, false},
-		{DirectionSouthEast, false},
-	} {
-		t.Run(test.dir.String(), func() {
-			t.Assert().Equal(test.expected, test.dir.IsOrthogonal())
-			t.Assert().Equal(test.expected, !test.dir.IsDiagonal())
-		})
-	}
-}
-
-func (t *DirectionTest) TestIsDiagonal() {
-	for _, test := range []struct {
-		dir      Direction
-		expected bool
-	}{
-		{DirectionNorth, false},
-		{DirectionSouth, false},
-		{DirectionEast, false},
-		{DirectionWest, false},
-		{DirectionNorthEast, true},
-		{DirectionSouthWest, true},
-		{DirectionNorthWest, true},
-		{DirectionSouthEast, true},
-	} {
-		t.Run(test.dir.String(), func() {
-			t.Assert().Equal(test.expected, test.dir.IsDiagonal())
-			t.Assert().Equal(test.expected, !test.dir.IsOrthogonal())
 		})
 	}
 }

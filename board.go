@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 )
@@ -12,22 +11,29 @@ type Board struct {
 	Player    Color
 	Attacks   Attacks
 	Pieces    [SquareCount]Piece
-	Kings     ColorTable[Square]
+	Kings     [ColorCount]Square
 	Bitboards struct {
 		All    Bitboard
-		Colors ColorTable[Bitboard]
-		Pieces PieceTable[Bitboard]
+		Colors [ColorCount]Bitboard
+		Pieces [PieceKindCount]Bitboard
 	}
-	Castling  ColorTable[struct{ Kingside, Queenside bool }]
-	Castled   ColorTable[bool]
+	Castling  [ColorCount]struct{ Kingside, Queenside bool }
 	EnPassant Square
 	Moves     struct {
 		Half int
 		Full int
 		Last Move
 	}
+}
 
-	_zobrist uint64
+type Attacks struct {
+	All    Bitboard
+	Checks struct {
+		Check  bool
+		Double bool
+		Rays   Bitboard
+	}
+	Pins Bitboard
 }
 
 const BoardStartPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -126,7 +132,7 @@ func NewBoard(fen string) (Board, error) {
 				continue
 			}
 
-			piece := PieceEmpty
+			piece := PieceNone
 
 			switch ch {
 			case 'k':
@@ -176,7 +182,7 @@ func NewBoard(fen string) (Board, error) {
 			b.Bitboards.Colors[piece.Color()].Set(square.Bitboard())
 			b.Bitboards.Pieces[piece.Kind()].Set(square.Bitboard())
 
-			if piece.Is(PieceKing) {
+			if piece.Is(PieceKindKing) {
 				b.Kings[piece.Color()] = square
 			}
 		}
@@ -196,7 +202,7 @@ func (b *Board) FEN() string {
 		for file := FileFirst; file <= FileLast; file++ {
 			piece := b.Pieces[NewSquare(file, rank)]
 
-			if piece.Is(PieceNone) {
+			if piece.Is(PieceKindNone) {
 				empty++
 			} else if empty > 0 {
 				s.WriteByte('0' + byte(empty))
@@ -298,23 +304,26 @@ func (b *Board) FEN() string {
 	return s.String()
 }
 
-func (b Board) MakeMove(move Move) Board {
-	slog.Debug("making move", "move", move)
+func (b *Board) GenerateMoves(opts MoveGeneratorOptions) []Move {
+	return MoveGenerator{}.Generate(b, opts)
+}
 
-	b._zobrist = 0
+func (b Board) MakeMove(move Move) Board {
 	b.EnPassant = 0
 	b.Moves.Last = move
 
 	piece := b.Pieces[move.From]
 	color := b.Player
 
-	if piece.Is(PiecePawn) || move.Flags.IsSet(MoveFlagsCapture) {
+	capture := !b.Pieces[move.To].Is(PieceKindNone)
+
+	if capture || piece.Is(PieceKindPawn) {
 		b.Moves.Half = 0
 	}
 
 	b.Moves.Half++
 
-	if piece.Is(PieceKing) {
+	if piece.Is(PieceKindKing) {
 		b.Kings[color] = move.To
 
 		b.Castling[color].Kingside = false
@@ -342,19 +351,17 @@ func (b Board) MakeMove(move Move) Board {
 			}
 
 			b.Pieces[rook.dst] = b.Pieces[rook.src]
-			b.Pieces[rook.src] = PieceEmpty
+			b.Pieces[rook.src] = PieceNone
 
 			b.Bitboards.Colors[color].Clear(rook.src.Bitboard())
 			b.Bitboards.Colors[color].Set(rook.dst.Bitboard())
 
-			b.Bitboards.Pieces[PieceRook].Clear(rook.src.Bitboard())
-			b.Bitboards.Pieces[PieceRook].Set(rook.dst.Bitboard())
-
-			b.Castled[color] = true
+			b.Bitboards.Pieces[PieceKindRook].Clear(rook.src.Bitboard())
+			b.Bitboards.Pieces[PieceKindRook].Set(rook.dst.Bitboard())
 		}
-	} else if piece.Is(PiecePawn) {
-		if promotion := move.Promotion(); promotion != PieceNone {
-			b.Bitboards.Pieces[PiecePawn].Clear(move.From.Bitboard())
+	} else if piece.Is(PieceKindPawn) {
+		if promotion := move.Promotion(); promotion != PieceKindNone {
+			b.Bitboards.Pieces[PieceKindPawn].Clear(move.From.Bitboard())
 
 			piece = NewPiece(color, promotion)
 		} else if move.Flags.IsSet(MoveFlagsDoublePawnPush) {
@@ -363,19 +370,19 @@ func (b Board) MakeMove(move Move) Board {
 			} else {
 				b.EnPassant = move.From + DirectionSouth.Offset()
 			}
-		} else if move.Flags.IsSet(MoveFlagsCaptureEnPassant) {
+		} else if move.Flags.IsSet(MoveFlagsEnPassant) {
 			captured := move.To + DirectionSouth.Offset()
 
 			if color == ColorBlack {
 				captured = move.To + DirectionNorth.Offset()
 			}
 
-			b.Pieces[captured] = PieceEmpty
+			b.Pieces[captured] = PieceNone
 			b.Bitboards.All.Clear(captured.Bitboard())
 			b.Bitboards.Colors[color.Opponent()].Clear(captured.Bitboard())
-			b.Bitboards.Pieces[PiecePawn].Clear(captured.Bitboard())
+			b.Bitboards.Pieces[PieceKindPawn].Clear(captured.Bitboard())
 		}
-	} else if piece.Is(PieceRook) {
+	} else if piece.Is(PieceKindRook) {
 		if move.From == SquareA1 || move.From == SquareA8 {
 			b.Castling[color].Queenside = false
 		} else if move.From == SquareH1 || move.From == SquareH8 {
@@ -383,7 +390,7 @@ func (b Board) MakeMove(move Move) Board {
 		}
 	}
 
-	if move.Flags.IsSet(MoveFlagsCapture) {
+	if capture {
 		switch move.To {
 		case SquareA1:
 			b.Castling[ColorWhite].Queenside = false
@@ -400,7 +407,7 @@ func (b Board) MakeMove(move Move) Board {
 	}
 
 	b.Pieces[move.To] = piece
-	b.Pieces[move.From] = PieceEmpty
+	b.Pieces[move.From] = PieceNone
 
 	b.Bitboards.Colors[color].Clear(move.From.Bitboard())
 	b.Bitboards.Colors[color].Set(move.To.Bitboard())
@@ -425,38 +432,131 @@ func (b Board) MakeMove(move Move) Board {
 	return b
 }
 
-func (board *Board) GenerateMoves(opts MoveGeneratorOptions) []Move {
-	return MoveGenerator{}.Generate(board, opts)
+func (a *Attacks) Generate(board *Board, attacker Color) {
+	*a = Attacks{}
+
+	a.king(board, attacker)
+	a.sliding(board, attacker)
+	a.knight(board, attacker)
+	a.pawn(board, attacker)
+
+	if !board.Attacks.Checks.Check {
+		board.Attacks.Checks.Rays = BitboardAll
+	}
 }
 
-func (board *Board) Zobrist() uint64 {
-	if board._zobrist == 0 {
-		zobrist := uint64(0)
+func (a *Attacks) king(board *Board, attacker Color) {
+	a.All.Set(Magic.KingMoves(board.Kings[attacker]))
+}
 
-		zobrist ^= Precomputed.Zobrist.Players[board.Player]
+func (a *Attacks) sliding(board *Board, attacker Color) {
+	queens := board.Bitboards.Pieces[PieceKindQueen] & board.Bitboards.Colors[attacker]
 
-		for src, piece := range board.Pieces {
-			if !piece.Is(PieceNone) {
-				zobrist ^= Precomputed.Zobrist.Pieces[piece.Color()][piece.Kind()][src]
-			}
-		}
+	orthogonal := (board.Bitboards.Pieces[PieceKindRook] & board.Bitboards.Colors[attacker]) | queens
+	diagonal := (board.Bitboards.Pieces[PieceKindBishop] & board.Bitboards.Colors[attacker]) | queens
 
-		for color, castling := range board.Castling {
-			if castling.Kingside {
-				zobrist ^= Precomputed.Zobrist.Castling[color].Kingside
-			}
+	// don't include opponent's king to prevent them from accidentally
+	// staying in check
+	blockers := board.Bitboards.All & ^board.Kings[attacker.Opponent()].Bitboard()
 
-			if castling.Queenside {
-				zobrist ^= Precomputed.Zobrist.Castling[color].Queenside
-			}
-		}
+	for orthogonal := orthogonal; orthogonal != 0; {
+		src := Square(orthogonal.PopLSB())
 
-		if board.EnPassant != 0 {
-			zobrist ^= Precomputed.Zobrist.EnPassant[board.EnPassant]
-		}
-
-		board._zobrist = zobrist
+		a.All.Set(Magic.OrthogonalMoves(src, blockers))
 	}
 
-	return board._zobrist
+	for diagonal := diagonal; diagonal != 0; {
+		src := Square(diagonal.PopLSB())
+
+		a.All.Set(Magic.DiagonalMoves(src, blockers))
+	}
+
+	// find pins / checks
+	src := board.Kings[attacker.Opponent()]
+
+	for _, dir := range Directions {
+		sliders := Bitboard(0)
+
+		if dir.IsDiagonal() {
+			sliders = diagonal
+		} else {
+			sliders = orthogonal
+		}
+
+		if !dir.Mask(src).AnySet(sliders) {
+			continue
+		}
+
+		pin := false
+		ray := Bitboard(0)
+
+		for mul := Square(1); mul <= dir.ToEdge(src); mul++ {
+			dst := src + dir.Offset()*mul
+			ray.Set(dst.Bitboard())
+
+			blocker := board.Pieces[dst]
+
+			if blocker.Is(PieceKindNone) {
+				continue
+			}
+
+			if blocker.Color() == attacker {
+				if (dir.IsDiagonal() && diagonal.IsSet(dst.Bitboard())) || (!dir.IsDiagonal() && orthogonal.IsSet(dst.Bitboard())) {
+					if pin {
+						a.Pins.Set(ray)
+					} else {
+						a.Checks.Double = a.Checks.Check
+						a.Checks.Check = true
+						a.Checks.Rays.Set(ray)
+					}
+
+					break
+				}
+			}
+
+			if !pin {
+				// opponent's piece blocks the ray, could be pinned
+				pin = true
+			} else {
+				// second piece blocking the ray, not a pin
+				break
+			}
+		}
+	}
+}
+
+func (a *Attacks) knight(board *Board, attacker Color) {
+	knights := board.Bitboards.Pieces[PieceKindKnight] & board.Bitboards.Colors[attacker]
+
+	for knights != 0 {
+		src := Square(knights.PopLSB())
+
+		attacks := Magic.KnightMoves(src)
+
+		if attacks.IsSet(board.Kings[attacker.Opponent()].Bitboard()) {
+			a.Checks.Double = a.Checks.Check
+			a.Checks.Check = true
+			a.Checks.Rays.Set(src.Bitboard())
+		}
+
+		a.All.Set(attacks)
+	}
+}
+
+func (a *Attacks) pawn(board *Board, attacker Color) {
+	pawns := board.Bitboards.Pieces[PieceKindPawn] & board.Bitboards.Colors[attacker]
+
+	for pawns != 0 {
+		src := Square(pawns.PopLSB())
+
+		attacks := Magic.PawnAttacks(attacker, src)
+
+		if attacks.IsSet(board.Kings[attacker.Opponent()].Bitboard()) {
+			a.Checks.Double = a.Checks.Check
+			a.Checks.Check = true
+			a.Checks.Rays.Set(src.Bitboard())
+		}
+
+		a.All.Set(attacks)
+	}
 }

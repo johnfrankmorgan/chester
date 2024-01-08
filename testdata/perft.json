@@ -1,172 +1,266 @@
 [
   {
-    "FEN": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-    "Results": [
-      {
-        "Moves": 1
-      },
-      {
-        "Moves": 20
-      },
-      {
-        "Moves": 400
-      },
-      {
-        "Moves": 8902,
-        "Captures": 34,
-        "Checks": 12
-      },
-      {
-        "Moves": 197281,
-        "Captures": 1576,
-        "Checks": 469,
-        "Checkmates": 8
-      },
-      {
-        "Moves": 4865609,
-        "Captures": 82719,
-        "EnPassantCaptures": 258,
-        "Checks": 27351,
-        "Checkmates": 347
-      },
-      {
-        "Moves": 119060324,
-        "Captures": 2812008,
-        "EnPassantCaptures": 5248,
-        "Checks": 809099,
-        "DoubleChecks": 46,
-        "Checkmates": 10828
-      }
-    ]
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 1,
+    "nodes": 20
   },
   {
-    "FEN": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
-    "Results": [
-      {
-        "Moves": 1
-      },
-      {
-        "Moves": 48,
-        "Captures": 8,
-        "Castles": 2
-      },
-      {
-        "Moves": 2039,
-        "Captures": 351,
-        "EnPassantCaptures": 1,
-        "Castles": 91,
-        "Checks": 3
-      },
-      {
-        "Moves": 97862,
-        "Captures": 17102,
-        "EnPassantCaptures": 45,
-        "Castles": 3162,
-        "Checks": 993,
-        "Checkmates": 1
-      },
-      {
-        "Moves": 4085603,
-        "Captures": 757163,
-        "EnPassantCaptures": 1929,
-        "Castles": 128013,
-        "Promotions": 15172,
-        "Checks": 25523,
-        "DoubleChecks": 6,
-        "Checkmates": 43
-      },
-      {
-        "Moves": 193690690,
-        "Captures": 35043416,
-        "EnPassantCaptures": 73365,
-        "Castles": 4993637,
-        "Promotions": 8392,
-        "Checks": 3309887,
-        "DoubleChecks": 2637,
-        "Checkmates": 30171
-      }
-    ]
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 2,
+    "nodes": 400
   },
   {
-    "FEN": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
-    "Results": [
-      {
-        "Moves": 1
-      },
-      {
-        "Moves": 14,
-        "Captures": 1,
-        "Checks": 2
-      },
-      {
-        "Moves": 191,
-        "Captures": 14,
-        "Checks": 10
-      },
-      {
-        "Moves": 2812,
-        "Captures": 209,
-        "EnPassantCaptures": 2,
-        "Checks": 267
-      },
-      {
-        "Moves": 43238,
-        "Captures": 3348,
-        "EnPassantCaptures": 123,
-        "Checks": 1680,
-        "Checkmates": 17
-      },
-      {
-        "Moves": 674624,
-        "Captures": 52051,
-        "EnPassantCaptures": 1165,
-        "Checks": 52950,
-        "DoubleChecks": 3
-      },
-      {
-        "Moves": 11030083,
-        "Captures": 940350,
-        "EnPassantCaptures": 33325,
-        "Promotions": 7552,
-        "Checks": 452473,
-        "CheckMates": 2733
-      }
-    ]
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 3,
+    "nodes": 8902
   },
   {
-    "FEN": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
-    "Results": [
-      {
-        "Moves": 1,
-        "Checks": 1
-      },
-      {
-        "Moves": 6,
-        "Checks": 0
-      },
-      {
-        "Moves": 264,
-        "Captures": 87,
-        "Castles": 6,
-        "Promotions": 48,
-        "Checks": 10
-      },
-      {
-        "Moves": 9467,
-        "Captures": 1021,
-        "EnPassantCaptures": 4,
-        "Promotions": 120,
-        "Checks": 38,
-        "Checkmates": 22
-      },
-      {
-        "Moves": 422333,
-        "Captures": 131393,
-        "Castles": 7795,
-        "Promotions": 60032,
-        "Checks": 15492,
-        "Checkmates": 5
-      }
-    ]
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 4,
+    "nodes": 197281
+  },
+  {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 5,
+    "nodes": 4865609
+  },
+  {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 6,
+    "nodes": 119060324,
+    "skip": true
+  },
+  {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 7,
+    "nodes": 3195901860,
+    "skip": true
+  },
+  {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 8,
+    "nodes": 84998978956,
+    "skip": true
+  },
+  {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 9,
+    "nodes": 2439530234167,
+    "skip": true
+  },
+  {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "depth": 10,
+    "nodes": 69352859712417,
+    "skip": true
+  },
+  {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "depth": 1,
+    "nodes": 48
+  },
+  {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "depth": 2,
+    "nodes": 2039
+  },
+  {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "depth": 3,
+    "nodes": 97862
+  },
+  {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "depth": 4,
+    "nodes": 4085603
+  },
+  {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "depth": 5,
+    "nodes": 193690690,
+    "skip": true
+  },
+  {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "depth": 6,
+    "nodes": 8031647685,
+    "skip": true
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 1,
+    "nodes": 14
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 2,
+    "nodes": 191
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 3,
+    "nodes": 2812
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 4,
+    "nodes": 43238
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 5,
+    "nodes": 674624
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 6,
+    "nodes": 11030083,
+    "skip": true
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 7,
+    "nodes": 178633661
+  },
+  {
+    "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+    "depth": 8,
+    "nodes": 3009794393
+  },
+  {
+    "fen": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "depth": 1,
+    "nodes": 6
+  },
+  {
+    "fen": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "depth": 2,
+    "nodes": 264
+  },
+  {
+    "fen": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "depth": 3,
+    "nodes": 9467
+  },
+  {
+    "fen": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "depth": 4,
+    "nodes": 422333
+  },
+  {
+    "fen": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "depth": 5,
+    "nodes": 15833292
+  },
+  {
+    "fen": "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+    "depth": 6,
+    "nodes": 706045033
+  },
+  {
+    "fen": "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+    "depth": 1,
+    "nodes": 6
+  },
+  {
+    "fen": "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+    "depth": 2,
+    "nodes": 264
+  },
+  {
+    "fen": "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+    "depth": 3,
+    "nodes": 9467
+  },
+  {
+    "fen": "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+    "depth": 4,
+    "nodes": 422333
+  },
+  {
+    "fen": "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+    "depth": 5,
+    "nodes": 15833292
+  },
+  {
+    "fen": "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+    "depth": 6,
+    "nodes": 706045033
+  },
+  {
+    "fen": "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+    "depth": 1,
+    "nodes": 44
+  },
+  {
+    "fen": "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+    "depth": 2,
+    "nodes": 1486
+  },
+  {
+    "fen": "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+    "depth": 3,
+    "nodes": 62379
+  },
+  {
+    "fen": "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+    "depth": 4,
+    "nodes": 2103487
+  },
+  {
+    "fen": "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+    "depth": 5,
+    "nodes": 89941194,
+    "skip": true
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 1,
+    "nodes": 46
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 2,
+    "nodes": 2079
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 3,
+    "nodes": 89890
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 4,
+    "nodes": 3894594
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 5,
+    "nodes": 164075551,
+    "skip": true
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 6,
+    "nodes": 6923051137,
+    "skip": true
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 7,
+    "nodes": 287188994746,
+    "skip": true
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 8,
+    "nodes": 11923589843526,
+    "skip": true
+  },
+  {
+    "fen": "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+    "depth": 9,
+    "nodes": 490154852788714,
+    "skip": true
   }
 ]

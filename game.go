@@ -1,7 +1,7 @@
 package main
 
 type Game struct {
-	_boards []Board
+	boards []Board
 }
 
 func NewGame(fen string) (*Game, error) {
@@ -11,22 +11,18 @@ func NewGame(fen string) (*Game, error) {
 	}
 
 	return &Game{
-		_boards: []Board{board},
+		boards: []Board{board},
 	}, nil
 }
 
 func (g *Game) Board() *Board {
-	return &g._boards[len(g._boards)-1]
-}
-
-func (g *Game) Boards() []Board {
-	return g._boards
+	return &g.boards[len(g.boards)-1]
 }
 
 func (g *Game) MakeMove(move Move) {
-	g._boards = append(g._boards, g.Board().MakeMove(move))
+	g.boards = append(g.boards, g.Board().MakeMove(move))
 }
 
 func (g *Game) UnmakeMove() {
-	g._boards = g._boards[:len(g._boards)-1]
+	g.boards = g.boards[:len(g.boards)-1]
 }
