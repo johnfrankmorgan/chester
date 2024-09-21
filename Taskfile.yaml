@@ -1,0 +1,15 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - go run .
+  test:
+    cmds:
+      - mkdir -p tmp/tests
+      - go test -short -race -coverprofile=tmp/tests/coverprofile ./...
+      - go tool cover -func=tmp/tests/coverprofile
+
+  perftree:
+    cmds:
+      - perftree scripts/perft.sh
