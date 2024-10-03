@@ -1,0 +1,15 @@
+# fly.toml app configuration file generated for jfm-chester-bot on 2024-10-03T13:12:02+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'jfm-chester-bot'
+primary_region = 'lhr'
+
+[build]
+dockerfile = "docker/Dockerfile"
+
+[[vm]]
+memory = '1gb'
+cpu_kind = 'shared'
+cpus = 1

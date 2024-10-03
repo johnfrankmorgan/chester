@@ -17,3 +17,7 @@ tasks:
   docker:
     cmds:
       - docker build -t chester:latest -f docker/Dockerfile .
+
+  deploy:
+    cmds:
+      - fly deploy
