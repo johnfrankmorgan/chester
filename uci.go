@@ -230,18 +230,19 @@ func (uci *UCI) search(ctx context.Context) {
 			}
 		}
 
-		defer uci.stop()
+		defer func() {
+			uci.stop()
+			uci.info()
+			uci.send("bestmove", uci.sctx.BestMove)
+
+			uci.sctx = nil
+			uci.stop = nil
+		}()
 
 		Search(uci.sctx)
 	}()
 
 	<-ctx.Done()
-
-	uci.info()
-	uci.send("bestmove", uci.sctx.BestMove)
-
-	uci.sctx = nil
-	uci.stop = nil
 }
 
 func (uci *UCI) info() {
