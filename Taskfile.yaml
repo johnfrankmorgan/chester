@@ -21,3 +21,9 @@ tasks:
   deploy:
     cmds:
       - fly deploy
+
+  compare:
+    requires:
+      vars: [OLD]
+    cmds:
+      - scripts/compare.sh {{ .OLD }} {{ .NEW }}
