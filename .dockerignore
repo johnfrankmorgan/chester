@@ -1,0 +1,6 @@
+*
+!docker
+!embed
+!go.mod
+!go.sum
+!*.go

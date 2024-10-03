@@ -13,3 +13,7 @@ tasks:
   perftree:
     cmds:
       - perftree scripts/perft.sh
+
+  docker:
+    cmds:
+      - docker build -t chester:latest -f docker/Dockerfile .
