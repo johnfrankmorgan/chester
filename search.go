@@ -7,6 +7,8 @@ import (
 )
 
 type SearchContext struct {
+	context.Context
+
 	Game     *Game
 	BestMove Move
 
@@ -16,7 +18,7 @@ type SearchContext struct {
 	CurrentMove Move
 }
 
-func Search(ctx context.Context, sctx *SearchContext) {
+func Search(sctx *SearchContext) {
 	sctx.Start = time.Now()
 
 	moves := GenerateMoves(sctx.Game.Board(), MoveGenerationOptions{})

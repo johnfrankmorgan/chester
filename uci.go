@@ -194,7 +194,8 @@ func (uci *UCI) position(cmd UCICommand) {
 
 func (uci *UCI) search(ctx context.Context) {
 	uci.sctx = &SearchContext{
-		Game: uci.game,
+		Context: ctx,
+		Game:    uci.game,
 	}
 
 	go func() {
@@ -213,7 +214,7 @@ func (uci *UCI) search(ctx context.Context) {
 	go func() {
 		defer uci.stop()
 
-		Search(ctx, uci.sctx)
+		Search(uci.sctx)
 	}()
 
 	<-ctx.Done()
