@@ -2,6 +2,7 @@ package main
 
 type Game struct {
 	boards []Board
+	moves  []string
 }
 
 func GameFromFEN(fen string) (*Game, error) {
@@ -21,8 +22,13 @@ func (g *Game) Board() *Board {
 	return &g.boards[len(g.boards)-1]
 }
 
+func (g *Game) Moves() []string {
+	return g.moves
+}
+
 func (g *Game) MakeMove(move Move) {
 	g.boards = append(g.boards, g.Board().MakeMove(move))
+	g.moves = append(g.moves, move.String())
 }
 
 func (g *Game) MakeUCIMove(uci string) bool {
@@ -88,4 +94,5 @@ func (g *Game) MakeUCIMove(uci string) bool {
 
 func (g *Game) UnmakeMove() {
 	g.boards = g.boards[:len(g.boards)-1]
+	g.moves = g.moves[:len(g.moves)-1]
 }

@@ -14,6 +14,8 @@ import (
 )
 
 type UCI struct {
+	OpeningBook         bool          `help:"Use opening book to play opening moves" default:"true" negatable:""`
+	OpeningBookMoves    int           `help:"Number of moves to play from the opening book" default:"15"`
 	DefaultMoveTime     time.Duration `help:"Default time to spend calculating the best move" default:"250ms" env:"CHESTER_DEFAULT_MOVE_TIME"`
 	DefaultInfoInterval time.Duration `help:"Default interval to send info messages" default:"500ms"`
 
@@ -212,6 +214,22 @@ func (uci *UCI) search(ctx context.Context) {
 	}()
 
 	go func() {
+		if uci.OpeningBook && len(uci.sctx.Game.Moves()) < uci.OpeningBookMoves {
+			slog.Debug("trying book move")
+
+			move := RandomOpeningMove(uci.sctx.Game.Moves()...)
+			if move != nil {
+				slog.Info("using book move", "move", move)
+				uci.send("bestmove", move)
+
+				uci.stop()
+				uci.sctx = nil
+				uci.stop = nil
+
+				return
+			}
+		}
+
 		defer uci.stop()
 
 		Search(uci.sctx)
