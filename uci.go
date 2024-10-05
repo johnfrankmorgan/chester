@@ -144,7 +144,10 @@ func (uci *UCI) handle(ctx context.Context, cmd UCICommand) {
 		slog.Warn("not implemented", "command", name)
 
 	case "quit":
-		uci.stop()
+		if uci.stop != nil {
+			uci.stop()
+		}
+
 		uci.quit = true
 
 	default:
