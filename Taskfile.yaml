@@ -4,6 +4,11 @@ tasks:
   default:
     cmds:
       - go run .
+
+  profile:
+    cmds:
+      - mkdir -p tmp/profiles
+      - go run . --profile=$(mktemp tmp/profiles/chester-XXXX.pprof)
   test:
     cmds:
       - mkdir -p tmp/tests
