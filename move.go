@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"strings"
 )
 
@@ -317,4 +318,59 @@ func GeneratePawnMoves(b *Board, moves []Move, opts MoveGenerationOptions) []Mov
 	}
 
 	return moves
+}
+
+func ScoreMove(board *Board, move Move) int {
+	if move.Flags&MoveFlagCapture == 0 {
+		if move.Flags&MoveFlagPromoteAny == 0 {
+			return 0
+		}
+
+		if move.Flags&MoveFlagPromoteToQueen != 0 {
+			return 10
+		} else if move.Flags&MoveFlagPromoteToRook != 0 {
+			return 9
+		} else if move.Flags&MoveFlagPromoteToBishop != 0 {
+			return 8
+		} else if move.Flags&MoveFlagPromoteToKnight != 0 {
+			return 7
+		}
+
+		return 0
+	}
+
+	attacker := board.Squares[move.From]
+	victim := board.Squares[move.To]
+
+	return [PieceTypeCount + 1][PieceTypeCount + 1]int{
+		Pawn:   {Pawn: 15, Knight: 14, Bishop: 13, Rook: 12, Queen: 11, King: 10},
+		Knight: {Pawn: 25, Knight: 24, Bishop: 23, Rook: 22, Queen: 21, King: 20},
+		Bishop: {Pawn: 35, Knight: 34, Bishop: 33, Rook: 32, Queen: 31, King: 30},
+		Rook:   {Pawn: 45, Knight: 44, Bishop: 43, Rook: 42, Queen: 41, King: 40},
+		Queen:  {Pawn: 55, Knight: 54, Bishop: 53, Rook: 52, Queen: 51, King: 50},
+		King:   {Pawn: 0, Knight: 0, Bishop: 0, Rook: 0, Queen: 0, King: 0},
+	}[victim.Type()][attacker.Type()]
+}
+
+func OrderMoves(board *Board, first Move, moves []Move) {
+	slices.SortFunc(moves, func(a, b Move) int {
+		if !first.IsZero() {
+			if a == first {
+				return -1
+			} else if b == first {
+				return 1
+			}
+		}
+
+		as := ScoreMove(board, a)
+		bs := ScoreMove(board, b)
+
+		if as > bs {
+			return -1
+		} else if as < bs {
+			return 1
+		}
+
+		return 0
+	})
 }

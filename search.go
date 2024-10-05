@@ -65,6 +65,8 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		return 0
 	}
 
+	OrderMoves(sctx.Game.Board(), sctx.BestMove, moves)
+
 	for _, move := range moves {
 		if depth == sctx.Depth {
 			sctx.CurrentMove = move

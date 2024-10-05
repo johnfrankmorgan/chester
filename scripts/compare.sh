@@ -29,10 +29,12 @@ go build -o ../../tmp/bin/old .
 
 cd ../..
 
+export CHESTER_DEFAULT_MOVE_TIME=${CHESTER_DEFAULT_MOVE_TIME:-200ms}
+
 cutechess-cli \
   -engine name=old cmd=tmp/bin/old proto=uci \
   -engine name=new cmd=tmp/bin/new proto=uci \
-  -concurrency ${CONCURRENCY:-8} \
-  -each tc=${TC:-30+2} \
+  -concurrency ${CONCURRENCY:-1} \
+  -each tc=${TC:-60+1} \
   -rounds ${ROUNDS:-10} \
   -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05
