@@ -33,6 +33,6 @@ cutechess-cli \
   -engine name=old cmd=tmp/bin/old proto=uci \
   -engine name=new cmd=tmp/bin/new proto=uci \
   -concurrency ${CONCURRENCY:-8} \
-  -each tc=${SECONDS:-30}+${INCREMENT:-2} \
+  -each tc=${TC:-30+2} \
   -rounds ${ROUNDS:-10} \
   -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05

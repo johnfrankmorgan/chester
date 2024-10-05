@@ -19,14 +19,22 @@ type SearchContext struct {
 	CurrentMove Move
 }
 
+const SearchMaxDepth = 32
+
 func Search(sctx *SearchContext) {
 	sctx.Start = time.Now()
-	sctx.Depth = 4
 
-	// TODO: iterative deepening
+	for sctx.Depth = 1; sctx.Depth <= SearchMaxDepth; sctx.Depth++ {
+		slog.Debug("starting iteration", "depth", sctx.Depth)
 
-	eval := search(sctx, sctx.Depth, -EvalInf, EvalInf)
-	slog.Info("eval", "eval", eval, "bestmove", sctx.BestMove)
+		if sctx.Err() != nil {
+			slog.Warn("search aborted")
+			break
+		}
+
+		eval := search(sctx, sctx.Depth, -EvalInf, EvalInf)
+		slog.Debug("completed iteration", "depth", sctx.Depth, "eval", eval, "bestmove", sctx.BestMove)
+	}
 
 	if sctx.BestMove.IsZero() {
 		moves := GenerateMoves(sctx.Game.Board(), MoveGenerationOptions{})
@@ -38,8 +46,7 @@ func Search(sctx *SearchContext) {
 
 func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 	if sctx.Err() != nil {
-		slog.Warn("search aborted", "depth", depth)
-		return alpha
+		return 0
 	}
 
 	if depth == 0 {
@@ -72,7 +79,7 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		} else if eval > alpha {
 			alpha = eval
 
-			if depth == sctx.Depth {
+			if depth == sctx.Depth && sctx.Err() == nil {
 				sctx.BestMove = move
 
 				if n, ok := eval.MateIn(); ok {
