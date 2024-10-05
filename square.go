@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"iter"
 )
 
@@ -110,7 +109,7 @@ func SquareFromString(s string) (Square, bool) {
 
 func (s Square) String() string {
 	if s.Valid() {
-		return fmt.Sprintf("%s%s", s.File(), s.Rank())
+		return s.File().String() + s.Rank().String()
 	}
 
 	return repr(s)

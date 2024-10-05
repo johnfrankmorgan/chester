@@ -28,7 +28,6 @@ func (g *Game) Moves() []string {
 
 func (g *Game) MakeMove(move Move) {
 	g.boards = append(g.boards, g.Board().MakeMove(move))
-	g.moves = append(g.moves, move.String())
 }
 
 func (g *Game) MakeUCIMove(uci string) bool {
@@ -89,10 +88,11 @@ func (g *Game) MakeUCIMove(uci string) bool {
 
 	g.MakeMove(move)
 
+	g.moves = append(g.moves, uci)
+
 	return true
 }
 
 func (g *Game) UnmakeMove() {
 	g.boards = g.boards[:len(g.boards)-1]
-	g.moves = g.moves[:len(g.moves)-1]
 }
