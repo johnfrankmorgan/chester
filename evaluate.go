@@ -24,7 +24,7 @@ func Evaluate(b *Board) Eval {
 func (e Eval) MateIn() (int, bool) {
 	e = abs(e)
 
-	if e < EvalMate {
+	if e < EvalMate-256 {
 		return 0, false
 	}
 

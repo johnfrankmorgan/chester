@@ -64,7 +64,7 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 
 	if len(moves) == 0 {
 		if sctx.Game.Board().Attacks.Checks > 0 {
-			return -(EvalMate - Eval(depth))
+			return -(EvalMate - Eval(sctx.Depth-depth))
 		}
 
 		return 0
@@ -123,6 +123,7 @@ func quiesce(sctx *SearchContext, alpha, beta Eval) Eval {
 	}
 
 	moves := GenerateMoves(sctx.Game.Board(), MoveGenerationOptions{CapturesOnly: true})
+	OrderMoves(sctx.Game.Board(), Move{}, moves)
 
 	for _, move := range moves {
 		sctx.Game.MakeMove(move)
