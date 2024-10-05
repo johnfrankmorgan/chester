@@ -17,9 +17,14 @@ type SearchContext struct {
 	Depth       int
 	Nodes       int
 	CurrentMove Move
+
+	Extensions int
 }
 
-const SearchMaxDepth = 32
+const (
+	SearchMaxDepth      = 32
+	SearchMaxExtensions = 3
+)
 
 func Search(sctx *SearchContext) {
 	sctx.Start = time.Now()
@@ -73,7 +78,23 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		}
 
 		sctx.Game.MakeMove(move)
-		eval := -search(sctx, depth-1, -beta, -alpha)
+
+		extension := 0
+		if sctx.Extensions < SearchMaxExtensions {
+			if sctx.Game.Board().Attacks.Checks > 0 {
+				slog.Debug("extending search", "reason", "check", "depth", depth, "move", move)
+
+				extension = 1
+				sctx.Extensions++
+			} else if move.Flags&MoveFlagPromoteAny != 0 {
+				slog.Debug("extending search", "reason", "promotion", "depth", depth, "move", move)
+
+				extension = 1
+				sctx.Extensions++
+			}
+		}
+
+		eval := -search(sctx, depth-1+extension, -beta, -alpha)
 		sctx.Game.UnmakeMove()
 
 		if eval >= beta {
