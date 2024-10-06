@@ -15,6 +15,7 @@ type Board struct {
 	EnPassant Square
 	Attacks   Attacks
 	Moves     BoardMoves
+	Zobrist   Zobrist
 }
 
 type BoardBitboards struct {
@@ -135,6 +136,7 @@ func BoardFromFEN(fen string) (Board, error) {
 	b.Moves.Full = full
 
 	b.Attacks = GenerateAttacks(&b, b.Player.Opponent())
+	b.Zobrist = CalculateZobrist(&b)
 
 	return b, nil
 }
@@ -169,24 +171,38 @@ func (b Board) String() string {
 		s.WriteString("\n     +---+---+---+---+---+---+---+---+")
 	}
 
-	s.WriteString("\n\n       a   b   c   d   e   f   g   h")
+	s.WriteString("\n\n       a   b   c   d   e   f   g   h\n\n")
+	fmt.Fprintf(&s, "   Player: %s\n", b.Player)
+	fmt.Fprintf(&s, "     Move: %s\n", b.Moves.Last)
+	fmt.Fprintf(&s, "     Half: %d\n", b.Moves.Half)
+	fmt.Fprintf(&s, "     Full: %d\n", b.Moves.Full)
+	fmt.Fprintf(&s, "EnPassant: %s\n", b.EnPassant)
+	fmt.Fprintf(&s, "  Zobrist: %d\n", b.Zobrist)
 
 	return s.String()
 }
 
 func (b Board) MakeMove(move Move) Board {
 	piece := b.Squares[move.From]
+	ptype := piece.Type()
 	color := piece.Color()
 
-	b.EnPassant = 0
+	if b.EnPassant != 0 {
+		b.Zobrist ^= Zobrists.EnPassant[b.EnPassant.File()]
+		b.EnPassant = 0
+	}
 
-	if piece.Type() == Pawn || move.Flags&MoveFlagCapture != 0 {
+	b.Zobrist ^= Zobrists.Players[b.Player]
+	b.Zobrist ^= Zobrists.Pieces[color][ptype][move.From]
+	b.Zobrist ^= Zobrists.Castling[CastlingZobristIndex(&b)]
+
+	if ptype == Pawn || move.Flags&MoveFlagCapture != 0 {
 		b.Moves.Half = 1
 	} else {
 		b.Moves.Half++
 	}
 
-	switch piece.Type() {
+	switch ptype {
 	case King:
 		b.Kings[color] = move.To
 		b.Castling[color] = BoardCastlingRights{}
@@ -216,6 +232,9 @@ func (b Board) MakeMove(move Move) Board {
 
 			b.Bits.Pieces[Rook] = b.Bits.Pieces[Rook].Unoccupy(rook.From)
 			b.Bits.Pieces[Rook] = b.Bits.Pieces[Rook].Occupy(rook.To)
+
+			b.Zobrist ^= Zobrists.Pieces[color][Rook][rook.From]
+			b.Zobrist ^= Zobrists.Pieces[color][Rook][rook.To]
 		}
 
 	case Rook:
@@ -228,13 +247,17 @@ func (b Board) MakeMove(move Move) Board {
 	case Pawn:
 		if promotion, ok := move.Promotion(); ok {
 			b.Bits.Pieces[Pawn] = b.Bits.Pieces[Pawn].Unoccupy(move.From)
+
 			piece = NewPiece(color, promotion)
+			ptype = promotion
 		} else if move.Flags&MoveFlagDoublePawnPush != 0 {
 			if color == White {
 				b.EnPassant = move.From + North.Offset()
 			} else {
 				b.EnPassant = move.From + South.Offset()
 			}
+
+			b.Zobrist ^= Zobrists.EnPassant[b.EnPassant]
 		} else if move.Flags&MoveFlagCaptureEnPassant != 0 {
 			target := move.To
 
@@ -265,6 +288,8 @@ func (b Board) MakeMove(move Move) Board {
 		case SquareH8:
 			b.Castling[Black].Kingside = false
 		}
+
+		b.Zobrist ^= Zobrists.Pieces[color.Opponent()][b.Squares[move.To].Type()][move.To]
 	}
 
 	b.Squares[move.From] = EmptySquare
@@ -278,8 +303,8 @@ func (b Board) MakeMove(move Move) Board {
 		b.Bits.Pieces[p] = b.Bits.Pieces[p].Unoccupy(move.To)
 	}
 
-	b.Bits.Pieces[piece.Type()] = b.Bits.Pieces[piece.Type()].Unoccupy(move.From)
-	b.Bits.Pieces[piece.Type()] = b.Bits.Pieces[piece.Type()].Occupy(move.To)
+	b.Bits.Pieces[ptype] = b.Bits.Pieces[ptype].Unoccupy(move.From)
+	b.Bits.Pieces[ptype] = b.Bits.Pieces[ptype].Occupy(move.To)
 	b.Bits.All = b.Bits.Players[Black].Set(b.Bits.Players[White])
 
 	if color == Black {
@@ -290,6 +315,10 @@ func (b Board) MakeMove(move Move) Board {
 
 	b.Attacks = GenerateAttacks(&b, b.Player)
 	b.Player = b.Player.Opponent()
+
+	b.Zobrist ^= Zobrists.Pieces[color][ptype][move.To]
+	b.Zobrist ^= Zobrists.Castling[CastlingZobristIndex(&b)]
+	b.Zobrist ^= Zobrists.Players[b.Player]
 
 	return b
 }

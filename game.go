@@ -72,6 +72,8 @@ func (g *Game) MakeUCIMove(uci string) bool {
 	if b.EnPassant != 0 && p.Type() == Pawn && move.To == b.EnPassant {
 		move.Flags |= MoveFlagCapture
 		move.Flags |= MoveFlagCaptureEnPassant
+	} else if p.Type() == Pawn && abs(move.From.Rank()-move.To.Rank()) == 2 {
+		move.Flags |= MoveFlagDoublePawnPush
 	}
 
 	if b.Squares[move.To] != EmptySquare {
