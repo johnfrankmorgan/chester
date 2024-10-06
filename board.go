@@ -268,9 +268,12 @@ func (b Board) MakeMove(move Move) Board {
 			}
 
 			b.Squares[target] = EmptySquare
+
 			b.Bits.All = b.Bits.All.Unoccupy(target)
 			b.Bits.Players[color.Opponent()] = b.Bits.Players[color.Opponent()].Unoccupy(target)
 			b.Bits.Pieces[Pawn] = b.Bits.Pieces[Pawn].Unoccupy(target)
+
+			b.Zobrist ^= Zobrists.Pieces[color.Opponent()][Pawn][target]
 		}
 	}
 
@@ -289,7 +292,9 @@ func (b Board) MakeMove(move Move) Board {
 			b.Castling[Black].Kingside = false
 		}
 
-		b.Zobrist ^= Zobrists.Pieces[color.Opponent()][b.Squares[move.To].Type()][move.To]
+		if move.Flags&MoveFlagCaptureEnPassant == 0 {
+			b.Zobrist ^= Zobrists.Pieces[color.Opponent()][b.Squares[move.To].Type()][move.To]
+		}
 	}
 
 	b.Squares[move.From] = EmptySquare

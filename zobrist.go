@@ -17,7 +17,7 @@ var Zobrists struct {
 func init() {
 	rand := rand.New(rand.NewSource(0xdeadbeef)) // use constant seed for reproducibility
 
-	for off := uintptr(0); off < unsafe.Sizeof(Zobrists); off += 8 {
+	for off := uintptr(0); off < unsafe.Sizeof(Zobrists); off += unsafe.Sizeof(uint64(0)) {
 		*(*uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&Zobrists)) + off)) = rand.Uint64()
 	}
 }
@@ -59,9 +59,7 @@ func CalculateZobrist(b *Board) Zobrist {
 		zobrist ^= Zobrists.Pieces[piece.Color()][piece.Type()][src]
 	}
 
-	if b.EnPassant != 0 {
-		zobrist ^= Zobrists.EnPassant[b.EnPassant]
-	}
+	zobrist ^= Zobrists.EnPassant[b.EnPassant]
 
 	return zobrist
 }

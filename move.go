@@ -73,6 +73,7 @@ func (m Move) Promotion() (PieceType, bool) {
 			return Knight, true
 		}
 	}
+
 	return 0, false
 }
 

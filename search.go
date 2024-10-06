@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"log/slog"
-	"math/rand"
 	"time"
 )
 
 type SearchContext struct {
 	context.Context
 
-	Game     *Game
-	BestMove Move
+	Game *Game
+	TT   *TranspositionTable
+
+	Best Move
 
 	Start       time.Time
 	Depth       int
@@ -38,14 +39,19 @@ func Search(sctx *SearchContext) {
 		}
 
 		eval := search(sctx, sctx.Depth, -EvalInf, EvalInf)
-		slog.Debug("completed iteration", "depth", sctx.Depth, "eval", eval, "bestmove", sctx.BestMove)
+		slog.Debug("completed iteration", "depth", sctx.Depth, "eval", eval, "bestmove", sctx.Best)
+
+		if n, ok := eval.MateIn(); ok {
+			slog.Debug("mate", "in", n, "move", sctx.Best)
+			break
+		}
 	}
 
-	if sctx.BestMove.IsZero() {
+	if sctx.Best.IsZero() {
 		moves := GenerateMoves(sctx.Game.Board(), MoveGenerationOptions{})
-		sctx.BestMove = moves[rand.Intn(len(moves))]
+		sctx.Best = moves[0]
 
-		slog.Warn("failed to find best move, selected random move", "move", sctx.BestMove)
+		slog.Warn("failed to find best move, selected first", "move", sctx.Best)
 	}
 }
 
@@ -66,6 +72,27 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		}
 	}
 
+	if t, ok := sctx.TT.Get(sctx.Game.Board().Zobrist); ok && t.Depth >= depth {
+		if sctx.Extensions == 0 && depth == sctx.Depth {
+			sctx.Best = t.Best
+		}
+
+		switch t.Bound {
+		case BoundBeta:
+			if t.Eval >= beta {
+				return beta
+			}
+
+		case BoundAlpha:
+			if t.Eval <= alpha {
+				return alpha
+			}
+
+		case BoundExact:
+			return t.Eval
+		}
+	}
+
 	if depth == 0 {
 		sctx.Nodes++
 
@@ -73,6 +100,11 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 	}
 
 	moves := GenerateMoves(sctx.Game.Board(), MoveGenerationOptions{})
+	trans := Transposition{
+		Key:   sctx.Game.Board().Zobrist,
+		Depth: depth,
+		Bound: BoundAlpha,
+	}
 
 	if len(moves) == 0 {
 		if sctx.Game.Board().Attacks.Checks > 0 {
@@ -82,7 +114,7 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		return 0
 	}
 
-	OrderMoves(sctx.Game.Board(), sctx.BestMove, moves)
+	OrderMoves(sctx.Game.Board(), sctx.Best, moves)
 
 	for _, move := range moves {
 		if depth == sctx.Depth {
@@ -94,37 +126,52 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		extension := 0
 		if sctx.Extensions < SearchMaxExtensions {
 			if sctx.Game.Board().Attacks.Checks > 0 {
-				slog.Debug("extending search", "reason", "check", "depth", depth, "move", move)
-
 				extension = 1
-				sctx.Extensions++
 			} else if move.Flags&MoveFlagPromoteAny != 0 {
-				slog.Debug("extending search", "reason", "promotion", "depth", depth, "move", move)
-
 				extension = 1
-				sctx.Extensions++
 			}
 		}
+
+		sctx.Extensions += extension
 
 		eval := -search(sctx, depth-1+extension, -beta, -alpha)
 		sctx.Game.UnmakeMove()
 
+		sctx.Extensions -= extension
+
 		if eval >= beta {
+			if sctx.Err() == nil {
+				sctx.TT.Store(Transposition{
+					Key:   sctx.Game.Board().Zobrist,
+					Eval:  beta,
+					Bound: BoundBeta,
+					Best:  move,
+					Depth: depth,
+				})
+			}
+
 			return beta
 		} else if eval > alpha {
-			alpha = eval
-
-			if depth == sctx.Depth && sctx.Err() == nil {
-				sctx.BestMove = move
-
-				if n, ok := eval.MateIn(); ok {
-					slog.Debug("mate", "in", n, "move", move)
-				}
+			if sctx.Err() == nil {
+				trans.Best = move
+				trans.Bound = BoundExact
 			}
+
+			alpha = eval
 		}
 	}
 
-	return alpha
+	trans.Eval = alpha
+
+	if sctx.Err() == nil {
+		sctx.TT.Store(trans)
+
+		if sctx.Extensions == 0 && depth == sctx.Depth {
+			sctx.Best = trans.Best
+		}
+	}
+
+	return trans.Eval
 }
 
 func quiesce(sctx *SearchContext, alpha, beta Eval) Eval {

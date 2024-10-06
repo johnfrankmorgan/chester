@@ -15,7 +15,7 @@ import (
 
 type UCI struct {
 	OpeningBook         bool          `help:"Use opening book to play opening moves" default:"true" negatable:""`
-	OpeningBookMoves    int           `help:"Number of moves to play from the opening book" default:"15"`
+	OpeningBookMoves    int           `help:"Number of moves to play from the opening book" default:"20"`
 	DefaultMoveTime     time.Duration `help:"Default time to spend calculating the best move" default:"250ms" env:"CHESTER_DEFAULT_MOVE_TIME"`
 	DefaultInfoInterval time.Duration `help:"Default interval to send info messages" default:"500ms"`
 
@@ -26,6 +26,7 @@ type UCI struct {
 	debug bool
 
 	game *Game
+	tt   *TranspositionTable
 	sctx *SearchContext
 	stop func()
 }
@@ -37,6 +38,8 @@ func (uci *UCI) Run(ctx context.Context) error {
 	uci.stdout = os.Stdout
 
 	slog.Info("starting uci engine")
+
+	uci.tt = NewTranspositionTable()
 
 	return uci.run(ctx)
 }
@@ -201,6 +204,7 @@ func (uci *UCI) search(ctx context.Context) {
 	uci.sctx = &SearchContext{
 		Context: ctx,
 		Game:    uci.game,
+		TT:      uci.tt,
 	}
 
 	go func() {
@@ -236,7 +240,7 @@ func (uci *UCI) search(ctx context.Context) {
 		defer func() {
 			uci.stop()
 			uci.info()
-			uci.send("bestmove", uci.sctx.BestMove)
+			uci.send("bestmove", uci.sctx.Best)
 
 			uci.sctx = nil
 			uci.stop = nil
