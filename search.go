@@ -54,6 +54,18 @@ func search(sctx *SearchContext, depth int, alpha, beta Eval) Eval {
 		return 0
 	}
 
+	if depth != sctx.Depth {
+		if sctx.Game.Board().Moves.Half >= 100 {
+			return 0
+		}
+
+		for b := range sctx.Game.Boards() {
+			if b != sctx.Game.Board() && b.Zobrist == sctx.Game.Board().Zobrist {
+				return 0
+			}
+		}
+	}
+
 	if depth == 0 {
 		sctx.Nodes++
 

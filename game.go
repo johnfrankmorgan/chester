@@ -1,5 +1,7 @@
 package main
 
+import "iter"
+
 type Game struct {
 	boards []Board
 	moves  []string
@@ -20,6 +22,16 @@ func GameFromFEN(fen string) (*Game, error) {
 
 func (g *Game) Board() *Board {
 	return &g.boards[len(g.boards)-1]
+}
+
+func (g *Game) Boards() iter.Seq[*Board] {
+	return func(yield func(*Board) bool) {
+		for i := 0; i < len(g.boards); i++ {
+			if !yield(&g.boards[i]) {
+				break
+			}
+		}
+	}
 }
 
 func (g *Game) Moves() []string {
