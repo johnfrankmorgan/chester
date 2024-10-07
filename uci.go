@@ -16,7 +16,7 @@ import (
 type UCI struct {
 	OpeningBook         bool          `help:"Use opening book to play opening moves" default:"true" negatable:""`
 	OpeningBookMoves    int           `help:"Number of moves to play from the opening book" default:"20"`
-	DefaultMoveTime     time.Duration `help:"Default time to spend calculating the best move" default:"250ms" env:"CHESTER_DEFAULT_MOVE_TIME"`
+	DefaultMoveTime     time.Duration `help:"Default time to spend calculating the best move" default:"1s" env:"CHESTER_DEFAULT_MOVE_TIME"`
 	DefaultInfoInterval time.Duration `help:"Default interval to send info messages" default:"500ms"`
 
 	stdin  io.Reader
@@ -120,12 +120,37 @@ func (uci *UCI) handle(ctx context.Context, cmd UCICommand) {
 			slog.Debug("starting infinite search")
 			go uci.search(ctx)
 		} else {
-			timeout := uci.DefaultMoveTime
+			timeout := time.Duration(0)
 
 			if mtime, ok := cmd.IntArg("movetime"); ok {
 				timeout = time.Duration(mtime) * time.Millisecond
 			} else {
-				slog.Info("movetime not provided, using default")
+				remaining := [ColorCount]time.Duration{}
+				increment := [ColorCount]time.Duration{}
+
+				remaining[White], _ = cmd.DurationArg("wtime")
+				increment[White], _ = cmd.DurationArg("winc")
+
+				remaining[Black], _ = cmd.DurationArg("btime")
+				increment[Black], _ = cmd.DurationArg("binc")
+
+				player := uci.game.Board().Player
+				timeout = remaining[player]/40 + increment[player]/2
+
+				if timeout >= remaining[player] {
+					timeout = remaining[player] - 500*time.Millisecond
+				}
+
+				if timeout < 0 {
+					timeout = 100 * time.Millisecond
+				}
+			}
+
+			if timeout == 0 {
+				timeout = uci.DefaultMoveTime
+				slog.Debug("using default movetime", "timeout", timeout)
+			} else {
+				slog.Debug("using movetime", "timeout", timeout)
 			}
 
 			ctx, cancel := context.WithTimeout(ctx, timeout)
@@ -317,6 +342,14 @@ func (cmd UCICommand) IntArg(name string) (int, bool) {
 	}
 
 	return value, true
+}
+
+func (cmd UCICommand) DurationArg(name string) (time.Duration, bool) {
+	if n, ok := cmd.IntArg(name); ok {
+		return time.Duration(n) * time.Millisecond, true
+	}
+
+	return 0, false
 }
 
 func (cmd UCICommand) BoolArg(name string) bool {

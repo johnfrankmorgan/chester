@@ -31,6 +31,8 @@ func Search(sctx *SearchContext) {
 	sctx.Start = time.Now()
 
 	for sctx.Depth = 1; sctx.Depth <= SearchMaxDepth; sctx.Depth++ {
+		start := time.Now()
+
 		slog.Debug("starting iteration", "depth", sctx.Depth)
 
 		if sctx.Err() != nil {
@@ -43,6 +45,16 @@ func Search(sctx *SearchContext) {
 
 		if n, ok := eval.MateIn(); ok {
 			slog.Debug("mate", "in", n, "move", sctx.Best)
+			break
+		}
+
+		deadline, ok := sctx.Deadline()
+		if !ok {
+			continue
+		}
+
+		if d := time.Since(start); time.Now().Add(d * 2).After(deadline) {
+			slog.Warn("unlikely to have time for another iteration")
 			break
 		}
 	}
